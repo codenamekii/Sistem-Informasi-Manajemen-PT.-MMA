@@ -10,7 +10,7 @@
 {{-- Summary Cards --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
-    <x-stat-card title="Fasilitas Kesehatan" description="4 ditambahkan bulan ini" color="blue">
+    <x-stat-card title="Fasilitas Kesehatan" description="belum ada data" color="blue">
         <x-slot:icon>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

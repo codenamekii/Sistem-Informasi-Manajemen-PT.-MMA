@@ -1,22 +1,27 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Livewire\FasilitasKesehatan\Index  as FasilitasIndex;
-use App\Livewire\FasilitasKesehatan\Create as FasilitasCreate;
-use App\Livewire\FasilitasKesehatan\Show   as FasilitasShow;
-use App\Livewire\FasilitasKesehatan\Edit   as FasilitasEdit;
-use App\Livewire\KerjaSama\Index           as KerjaSamaIndex;
-use App\Livewire\KerjaSama\Create          as KerjaSamaCreate;
-use App\Livewire\KerjaSama\Show            as KerjaSamaShow;
-use App\Livewire\KerjaSama\Edit            as KerjaSamaEdit;
-use App\Livewire\Dokumen\Index             as DokumenIndex;
-use App\Livewire\Dokumen\Create            as DokumenCreate;
-use App\Livewire\Dokumen\Show              as DokumenShow;
-use App\Livewire\Dokumen\Edit              as DokumenEdit;
-use App\Livewire\Armada\Index              as ArmadaIndex;
-use App\Livewire\Armada\Create             as ArmadaCreate;
-use App\Livewire\Armada\Show               as ArmadaShow;
-use App\Livewire\Armada\Edit               as ArmadaEdit;
+use App\Livewire\FasilitasKesehatan\Index      as FasilitasIndex;
+use App\Livewire\FasilitasKesehatan\Create     as FasilitasCreate;
+use App\Livewire\FasilitasKesehatan\Show       as FasilitasShow;
+use App\Livewire\FasilitasKesehatan\Edit       as FasilitasEdit;
+use App\Livewire\KerjaSama\Index               as KerjaSamaIndex;
+use App\Livewire\KerjaSama\Create              as KerjaSamaCreate;
+use App\Livewire\KerjaSama\Show                as KerjaSamaShow;
+use App\Livewire\KerjaSama\Edit                as KerjaSamaEdit;
+use App\Livewire\Dokumen\Index                 as DokumenIndex;
+use App\Livewire\Dokumen\Create                as DokumenCreate;
+use App\Livewire\Dokumen\Show                  as DokumenShow;
+use App\Livewire\Dokumen\Edit                  as DokumenEdit;
+use App\Livewire\Armada\Index                  as ArmadaIndex;
+use App\Livewire\Armada\Create                 as ArmadaCreate;
+use App\Livewire\Armada\Show                   as ArmadaShow;
+use App\Livewire\Armada\Edit                   as ArmadaEdit;
+use App\Livewire\Petugas\Index                 as PetugasIndex;
+use App\Livewire\Petugas\Create                as PetugasCreate;
+use App\Livewire\Petugas\Show                  as PetugasShow;
+use App\Livewire\Petugas\Edit                  as PetugasEdit;
+use App\Livewire\JadwalPengangkutan\Index      as JadwalIndex;
 
 Route::get('/', function () {
     return view('landing');
@@ -67,4 +72,18 @@ Route::middleware(['auth'])->group(function () {
         ->name('armada.show');
     Route::get('/armada/{armada}/edit', ArmadaEdit::class)
         ->name('armada.edit');
+
+    // Petugas
+    Route::get('/petugas', PetugasIndex::class)
+        ->name('petugas.index');
+    Route::get('/petugas/create', PetugasCreate::class)
+        ->name('petugas.create');
+    Route::get('/petugas/{petugas}', PetugasShow::class)
+        ->name('petugas.show');
+    Route::get('/petugas/{petugas}/edit', PetugasEdit::class)
+        ->name('petugas.edit');
+
+    // Jadwal Pengangkutan
+    Route::get('/jadwal-pengangkutan', JadwalIndex::class)
+        ->name('jadwal-pengangkutan.index');
 });

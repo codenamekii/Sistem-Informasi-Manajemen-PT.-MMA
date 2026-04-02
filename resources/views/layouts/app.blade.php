@@ -93,8 +93,10 @@
                 </li>
 
                 <li>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                              text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                    <a href="{{ route('jadwal-pengangkutan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
+                              {{ request()->routeIs('jadwal-pengangkutan.*')
+                                 ? 'bg-blue-50 text-blue-700'
+                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0
                                      00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -117,8 +119,10 @@
                 </li>
 
                 <li>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                              text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                    <a href="{{ route('petugas.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
+                              {{ request()->routeIs('petugas.*')
+                                 ? 'bg-blue-50 text-blue-700'
+                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283
                                      -.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283
