@@ -2,60 +2,57 @@
 
 namespace App\Livewire\FasilitasKesehatan;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
 use App\Models\FasilitasKesehatan;
+use Illuminate\Contracts\View\View;
+use Livewire\Component;
 
-#[Layout('layouts.app')]
-#[Title('Tambah Fasilitas Kesehatan')]
 class Create extends Component
 {
-    #[Validate('required|string|max:255')]
-    public string $nama = '';
-
-    #[Validate('required|string|max:255')]
-    public string $jenis_fasilitas = '';
-
-    #[Validate('required|string|max:255')]
-    public string $kota_kabupaten = '';
-
-    #[Validate('required|in:prospect,active,inactive')]
-    public string $status = 'prospect';
-
-    public array $jenisOptions = [
-        'Rumah Sakit',
-        'Klinik',
-        'Puskesmas',
-        'Klinik Pratama',
-        'Rumah Sakit Umum',
-        'Rumah Sakit Khusus',
+    public array $form = [
+        'nama' => '',
+        'jenis_fasilitas' => '',
+        'kota_kabupaten' => '',
+        'provinsi' => '',
+        'status' => 'prospect',
+        'status_penawaran' => 'belum_masuk_penawaran',
+        'pic_nama' => '',
+        'pic_nomor_telepon' => '',
+        'kendala' => '',
     ];
 
-    public array $statusOptions = [
-        'prospect' => 'Prospek',
-        'active'   => 'Aktif',
-        'inactive' => 'Tidak Aktif',
-    ];
-
-    public function save(): void
+    public function save()
     {
-        $this->validate();
-
-        FasilitasKesehatan::create([
-            'nama'            => $this->nama,
-            'jenis_fasilitas' => $this->jenis_fasilitas,
-            'kota_kabupaten'  => $this->kota_kabupaten,
-            'status'          => $this->status,
+        $validated = $this->validate([
+            'form.nama' => ['required', 'string', 'max:255'],
+            'form.jenis_fasilitas' => ['required', 'string', 'max:255'],
+            'form.kota_kabupaten' => ['required', 'string', 'max:255'],
+            'form.provinsi' => ['nullable', 'string', 'max:255'],
+            'form.status' => ['required', 'in:prospect,active,inactive'],
+            'form.status_penawaran' => ['required', 'in:masuk_penawaran,belum_masuk_penawaran'],
+            'form.pic_nama' => ['nullable', 'string', 'max:255'],
+            'form.pic_nomor_telepon' => ['nullable', 'string', 'max:255'],
+            'form.kendala' => ['nullable', 'string'],
         ]);
+
+        FasilitasKesehatan::create($this->normalizePayload($validated['form']));
 
         session()->flash('success', 'Fasilitas kesehatan berhasil ditambahkan.');
 
-        $this->redirect(route('fasilitas-kesehatan.index'), navigate: false);
+        return redirect()->route('fasilitas-kesehatan.index');
     }
 
-    public function render()
+    protected function normalizePayload(array $payload): array
+    {
+        foreach (['provinsi', 'pic_nama', 'pic_nomor_telepon', 'kendala'] as $field) {
+            if (array_key_exists($field, $payload) && trim((string) $payload[$field]) === '') {
+                $payload[$field] = null;
+            }
+        }
+
+        return $payload;
+    }
+
+    public function render(): View
     {
         return view('livewire.fasilitas-kesehatan.create');
     }

@@ -11,5 +11,10 @@ class FasilitasKesehatan extends Model
         'jenis_fasilitas',
         'kota_kabupaten',
         'status',
+        'provinsi',
+        'status_penawaran',
+        'pic_nama',
+        'pic_nomor_telepon',
+        'kendala',
     ];
 }
