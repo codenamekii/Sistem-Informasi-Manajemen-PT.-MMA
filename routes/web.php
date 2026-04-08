@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Dashboard;
-use App\Livewire\FasilitasKesehatan\index as FasilitasIndex;
+use App\Livewire\FasilitasKesehatan\Index as FasilitasIndex;
 use App\Livewire\FasilitasKesehatan\Create as FasilitasCreate;
 use App\Livewire\FasilitasKesehatan\Show as FasilitasShow;
 use App\Livewire\FasilitasKesehatan\Edit as FasilitasEdit;
