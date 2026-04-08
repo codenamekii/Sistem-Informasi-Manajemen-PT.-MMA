@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ $judul }} — PT. Mitra Mecca Abadi</title>
   <style>
     * {
@@ -14,62 +13,62 @@
 
     body {
       font-family: 'DejaVu Sans', Arial, sans-serif;
-      font-size: 11px;
+      font-size: 10px;
       color: #1f2937;
       background: #fff;
-      padding: 24px;
+      padding: 20px 24px;
     }
 
-    .header {
+    .kop {
       border-bottom: 2px solid #1d4ed8;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
     }
 
-    .header .perusahaan {
-      font-size: 14px;
+    .kop-nama {
+      font-size: 13px;
       font-weight: bold;
       color: #1d4ed8;
     }
 
-    .header .alamat {
-      font-size: 10px;
+    .kop-sub {
+      font-size: 9px;
       color: #6b7280;
       margin-top: 2px;
     }
 
-    .judul-laporan {
-      font-size: 13px;
+    .judul {
+      font-size: 12px;
       font-weight: bold;
       color: #111827;
-      margin-top: 16px;
-      margin-bottom: 4px;
+      margin-top: 14px;
+      margin-bottom: 3px;
     }
 
     .meta {
-      font-size: 10px;
+      font-size: 9px;
       color: #6b7280;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
-    .filter-info {
+    .filter-box {
       background: #f0f9ff;
       border: 1px solid #bae6fd;
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin-bottom: 14px;
-      font-size: 10px;
+      border-radius: 3px;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+      font-size: 9px;
       color: #0369a1;
     }
 
-    .filter-info strong {
+    .filter-box strong {
       color: #0c4a6e;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 10px;
+      font-size: 9px;
     }
 
     thead tr {
@@ -78,7 +77,7 @@
     }
 
     thead th {
-      padding: 7px 10px;
+      padding: 6px 8px;
       text-align: left;
       font-weight: bold;
       white-space: nowrap;
@@ -88,61 +87,66 @@
       background-color: #f9fafb;
     }
 
-    tbody tr:hover {
-      background-color: #eff6ff;
-    }
-
     tbody td {
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-bottom: 1px solid #e5e7eb;
       vertical-align: top;
     }
 
-    .footer {
-      margin-top: 16px;
-      padding-top: 8px;
-      border-top: 1px solid #e5e7eb;
-      font-size: 10px;
-      color: #9ca3af;
-      display: flex;
-      justify-content: space-between;
+    .total {
+      margin-top: 10px;
+      font-size: 9px;
+      color: #374151;
+      font-style: italic;
     }
 
-    .total-baris {
-      font-size: 10px;
-      color: #374151;
-      margin-top: 10px;
-      font-style: italic;
+    .footer {
+      margin-top: 14px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 9px;
+      color: #9ca3af;
+    }
+
+    .footer-inner {
+      display: table;
+      width: 100%;
+    }
+
+    .footer-left {
+      display: table-cell;
+      text-align: left;
+    }
+
+    .footer-right {
+      display: table-cell;
+      text-align: right;
     }
   </style>
 </head>
 
 <body>
 
-  {{-- Kop --}}
-  <div class="header">
-    <div class="perusahaan">PT. Mitra Mecca Abadi</div>
-    <div class="alamat">Sistem Manajemen Internal — Laporan Operasional</div>
+  <div class="kop">
+    <div class="kop-nama">PT. Mitra Mecca Abadi</div>
+    <div class="kop-sub">Sistem Manajemen Internal — Laporan Operasional</div>
   </div>
 
-  {{-- Judul laporan --}}
-  <div class="judul-laporan">{{ $judul }}</div>
+  <div class="judul">{{ $judul }}</div>
   <div class="meta">
-    Dicetak pada: {{ now()->locale('id')->translatedFormat('l, d F Y — H:i') }} WIB
+    Dicetak pada: {{ now()->locale('id')->isoFormat('dddd, D MMMM Y — HH:mm') }} WIB
   </div>
 
-  {{-- Ringkasan filter --}}
   @if (!empty($filter))
-    <div class="filter-info">
-      <strong>Filter aktif:</strong> {{ $filter }}
+    <div class="filter-box">
+      <strong>Filter:</strong> {{ $filter }}
     </div>
   @endif
 
-  {{-- Tabel data --}}
   <table>
     <thead>
       <tr>
-        <th style="width:30px;">No.</th>
+        <th style="width:26px; text-align:center;">No.</th>
         @foreach ($kolom as $header)
           <th>{{ $header }}</th>
         @endforeach
@@ -151,7 +155,7 @@
     <tbody>
       @forelse ($hasil as $i => $baris)
         <tr>
-          <td>{{ $i + 1 }}</td>
+          <td style="text-align:center;">{{ $i + 1 }}</td>
           @foreach ($baris as $sel)
             <td>{{ $sel }}</td>
           @endforeach
@@ -159,7 +163,7 @@
       @empty
         <tr>
           <td colspan="{{ count($kolom) + 1 }}"
-            style="text-align:center; padding:20px; color:#9ca3af; font-style:italic;">
+            style="text-align:center; padding:16px; color:#9ca3af; font-style:italic;">
             Tidak ada data
           </td>
         </tr>
@@ -167,12 +171,13 @@
     </tbody>
   </table>
 
-  <div class="total-baris">Total: {{ count($hasil) }} baris data</div>
+  <div class="total">Total: {{ count($hasil) }} baris data</div>
 
-  {{-- Footer --}}
   <div class="footer">
-    <span>PT. Mitra Mecca Abadi — Dokumen Internal</span>
-    <span>{{ now()->format('d/m/Y H:i') }}</span>
+    <div class="footer-inner">
+      <div class="footer-left">PT. Mitra Mecca Abadi — Dokumen Internal</div>
+      <div class="footer-right">{{ now()->format('d/m/Y H:i') }}</div>
+    </div>
   </div>
 
 </body>

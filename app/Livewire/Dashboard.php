@@ -17,14 +17,14 @@ use Livewire\Attributes\Title;
 #[Layout('layouts.app')]
 class Dashboard extends Component
 {
-  // ─── Stat cards ───────────────────────────────────────
+  // Stat cards
   public int $totalFasilitas = 0;
   public int $kerjaSamaAktif = 0;
   public int $dokumenExpiredCount = 0;
   public int $jadwalHariIniCount = 0;
   public int $buktiKurangCount = 0;
 
-  // ─── Notifikasi ───────────────────────────────────────
+  // Notifikasi
   public array $notifKerjaSamaHabis = [];
   public array $notifDokumenExpired = [];
   public array $notifDokumenSegera = [];

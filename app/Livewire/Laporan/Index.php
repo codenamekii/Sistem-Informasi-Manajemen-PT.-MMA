@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -25,13 +26,13 @@ class Index extends Component
   public string $filterTanggalSampai = '';
   public string $filterStatus = '';
   public string $filterProvinsi = '';
-  public int $filterHari = 30;
+  public string $filterHari = '30';
 
   public array $hasil = [];
   public array $kolom = [];
   public bool $sudahCari = false;
 
-  // ─── Jenis laporan ────────────────────────────────────
+  // Definisi jenis laporan
 
   public function getJenisOptions(): array
   {
@@ -64,32 +65,42 @@ class Index extends Component
   }
 
   /**
-   * Ringkasan filter aktif untuk ditampilkan di PDF/print.
+   * Ringkasan filter — buat PDF, print, dan header preview.
    */
   protected function ringkasanFilter(): string
   {
     $parts = [];
 
-    if ($this->filterTanggalDari !== '') {
-      $parts[] = 'Dari: ' . Carbon::parse($this->filterTanggalDari)->format('d/m/Y');
+    if ($this->filterTanggalDari !== '' && $this->filterTanggalSampai !== '') {
+      $parts[] = Carbon::parse($this->filterTanggalDari)->format('d/m/Y')
+        . ' s/d '
+        . Carbon::parse($this->filterTanggalSampai)->format('d/m/Y');
+    } elseif ($this->filterTanggalDari !== '') {
+      $parts[] = 'Mulai ' . Carbon::parse($this->filterTanggalDari)->format('d/m/Y');
+    } elseif ($this->filterTanggalSampai !== '') {
+      $parts[] = 'Sampai ' . Carbon::parse($this->filterTanggalSampai)->format('d/m/Y');
     }
-    if ($this->filterTanggalSampai !== '') {
-      $parts[] = 'Sampai: ' . Carbon::parse($this->filterTanggalSampai)->format('d/m/Y');
-    }
+
     if ($this->filterStatus !== '') {
       $parts[] = 'Status: ' . $this->filterStatus;
     }
+
     if ($this->filterProvinsi !== '') {
       $parts[] = 'Provinsi: ' . $this->filterProvinsi;
     }
+
     if ($this->jenisLaporan === 'kontrak_habis') {
       $parts[] = 'Dalam ' . $this->filterHari . ' hari ke depan';
     }
 
-    return empty($parts) ? '' : implode(' | ', $parts);
+    if (empty($parts)) {
+      return 'Semua data (tanpa filter tambahan)';
+    }
+
+    return implode(' | ', $parts);
   }
 
-  // ─── Reset ────────────────────────────────────────────
+  // Reset
 
   public function updatedJenisLaporan(): void
   {
@@ -100,10 +111,10 @@ class Index extends Component
     $this->filterTanggalDari = '';
     $this->filterTanggalSampai = '';
     $this->filterProvinsi = '';
-    $this->filterHari = 30;
+    $this->filterHari = '30';
   }
 
-  // ─── Generate ─────────────────────────────────────────
+  // Generate
 
   public function generate(): void
   {
@@ -124,7 +135,7 @@ class Index extends Component
     };
   }
 
-  // ─── Export Excel ─────────────────────────────────────
+  // Export Excel
 
   public function exportExcel(): mixed
   {
@@ -148,8 +159,9 @@ class Index extends Component
     );
   }
 
-  // ─── Export PDF ───────────────────────────────────────
+  // Export PDF
 
+  #[Renderless]
   public function exportPdf(): mixed
   {
     if ($this->jenisLaporan === '') {
@@ -179,7 +191,7 @@ class Index extends Component
     );
   }
 
-  // ─── Cetak (window.print) ─────────────────────────────
+  // Cetak
 
   public function cetakLaporan(): void
   {
@@ -190,11 +202,11 @@ class Index extends Component
     $this->dispatch('do-print');
   }
 
-  // ─── Query methods ────────────────────────────────────
+  // Query: Fasilitas Kesehatan
 
   protected function queryFasilitasKesehatan(): void
   {
-    $this->kolom = ['Nama', 'Jenis', 'Kota/Kabupaten', 'Provinsi', 'Status', 'PIC', 'Kendala'];
+    $this->kolom = ['Nama', 'Jenis Fasilitas', 'Kota/Kabupaten', 'Provinsi', 'Status', 'Nama PIC', 'Kendala'];
 
     $this->hasil = FasilitasKesehatan::query()
       ->when($this->filterStatus !== '', fn($q) =>
@@ -214,9 +226,11 @@ class Index extends Component
       ])->all();
   }
 
+  // Query: Kerja Sama Aktif
+
   protected function queryKerjaSamaAktif(): void
   {
-    $this->kolom = ['No. Perjanjian', 'Fasilitas', 'Tgl. Mulai', 'Tgl. Berakhir', 'Harga/kg', 'Status'];
+    $this->kolom = ['No. Perjanjian', 'Nama Fasilitas', 'Tgl. Mulai', 'Tgl. Berakhir', 'Harga/kg (Rp)', 'Status'];
 
     $this->hasil = KerjaSama::with('fasilitasKesehatan')
       ->where('status', 'aktif')
@@ -236,9 +250,11 @@ class Index extends Component
       ])->all();
   }
 
+  // Query: Kontrak Akan Habis
+
   protected function queryKontrakHabis(): void
   {
-    $this->kolom = ['No. Perjanjian', 'Fasilitas', 'Tgl. Berakhir', 'Sisa Hari', 'Status'];
+    $this->kolom = ['No. Perjanjian', 'Nama Fasilitas', 'Tgl. Berakhir', 'Sisa Hari', 'Status'];
 
     $today = Carbon::today();
     $batas = Carbon::today()->addDays(max(1, (int) $this->filterHari));
@@ -252,14 +268,16 @@ class Index extends Component
         $ks->nomor_perjanjian,
         $ks->nama_fasilitas_display,
         $ks->tanggal_berakhir->format('d/m/Y'),
-        $today->diffInDays($ks->tanggal_berakhir) . ' hari',
+        $today->diffInDays($ks->tanggal_berakhir) . ' hari lagi',
         $ks->status,
       ])->all();
   }
 
+  // Query: Dokumen Expired
+
   protected function queryDokumenExpired(): void
   {
-    $this->kolom = ['Nama Dokumen', 'Kategori', 'No. Referensi', 'Terkait', 'Tgl. Berlaku Sampai', 'Status'];
+    $this->kolom = ['Nama Dokumen', 'Kategori', 'No. Referensi', 'Terkait', 'Berlaku Sampai', 'Status'];
 
     $today = Carbon::today();
     $batas = Carbon::today()->addDays(30);
@@ -291,9 +309,11 @@ class Index extends Component
       ])->all();
   }
 
+  // Query: Jadwal Pengangkutan
+
   protected function queryJadwalHarian(): void
   {
-    $this->kolom = ['Kode Jadwal', 'Tgl. Pengangkutan', 'Fasilitas', 'Armada', 'Petugas', 'Status'];
+    $this->kolom = ['Kode Jadwal', 'Tgl. Pengangkutan', 'Fasilitas', 'Armada', 'Petugas PIC', 'Status'];
 
     $this->hasil = JadwalPengangkutan::with(['kerjaSama.fasilitasKesehatan', 'armadaRelasi', 'petugas'])
       ->when($this->filterTanggalDari !== '', fn($q) =>
@@ -324,9 +344,11 @@ class Index extends Component
       ])->all();
   }
 
+  // Query: Realisasi Pengangkutan
+
   protected function queryRealisasi(): void
   {
-    $this->kolom = ['Kode Jadwal', 'Fasilitas', 'Tgl. Pengangkutan', 'Tgl. Realisasi', 'Armada', 'Petugas', 'Bukti'];
+    $this->kolom = ['Kode Jadwal', 'Fasilitas', 'Tgl. Pengangkutan', 'Tgl. Realisasi', 'Armada', 'Petugas PIC', 'Status Bukti'];
 
     $this->hasil = JadwalPengangkutan::realisasi()
       ->with(['kerjaSama.fasilitasKesehatan', 'armadaRelasi', 'petugas'])
@@ -349,9 +371,11 @@ class Index extends Component
       ])->all();
   }
 
+  // Query: Armada
+
   protected function queryArmada(): void
   {
-    $this->kolom = ['Kode Armada', 'No. Polisi', 'Jenis Kendaraan', 'Kapasitas', 'Status'];
+    $this->kolom = ['Kode Armada', 'No. Polisi', 'Jenis Kendaraan', 'Kapasitas (kg)', 'Status'];
 
     $this->hasil = Armada::query()
       ->when($this->filterStatus !== '', fn($q) =>
@@ -362,10 +386,12 @@ class Index extends Component
         $a->kode_armada ?: '—',
         $a->nomor_polisi ?: '—',
         $a->jenis_kendaraan ?: '—',
-        $a->kapasitas ? $a->kapasitas . ' kg' : '—',
+        $a->kapasitas ?: '—',
         $a->status ?: '—',
       ])->all();
   }
+
+  // Query: Petugas
 
   protected function queryPetugas(): void
   {
@@ -389,6 +415,10 @@ class Index extends Component
   {
     return view('livewire.laporan.index', [
       'jenisOptions' => $this->getJenisOptions(),
+      'judulAktif' => $this->getJenisOptions()[$this->jenisLaporan] ?? '',
+      'ringkasanFilterAktif' => ($this->sudahCari && $this->jenisLaporan !== '')
+        ? $this->ringkasanFilter()
+        : '',
     ]);
   }
 }

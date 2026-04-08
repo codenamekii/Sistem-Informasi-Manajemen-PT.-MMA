@@ -1,25 +1,39 @@
 <div x-data="{}" x-on:do-print.window="window.print()">
 
-  {{-- Print CSS — hanya tabel yang tercetak --}}
+  {{-- Print & cetak CSS --}}
   <style>
     @media print {
 
-      body>div>aside,
-      body>div>div>header,
-      body>div>div>footer,
-      [wire\:id]>div>.print-hidden {
+      /* Sembunyikan semua yang bukan konten laporan */
+      .print-hidden {
         display: none !important;
       }
 
-      .print-area {
+      /* Tampilkan header print */
+      .print-header {
         display: block !important;
       }
 
-      body {
-        background: #fff !important;
-        font-size: 11px;
+      /* Sembunyikan sidebar dan topbar via layout selector */
+      aside,
+      header,
+      footer,
+      nav {
+        display: none !important;
       }
 
+      /* Reset layout — hapus margin kiri untuk sidebar */
+      body,
+      .lg\:ml-64 {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      main {
+        padding: 0 !important;
+      }
+
+      /* Tabel print */
       table {
         width: 100%;
         border-collapse: collapse;
@@ -42,37 +56,13 @@
       tbody td {
         padding: 5px 8px;
         border-bottom: 1px solid #e5e7eb;
+        vertical-align: top;
       }
 
       tbody tr:nth-child(even) {
         background-color: #f9fafb !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-      }
-
-      .print-header {
-        display: block !important;
-        margin-bottom: 16px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #1d4ed8;
-      }
-
-      .print-header .nama-perusahaan {
-        font-size: 14px;
-        font-weight: bold;
-        color: #1d4ed8;
-      }
-
-      .print-judul {
-        font-size: 13px;
-        font-weight: bold;
-        margin: 12px 0 4px;
-      }
-
-      .print-meta {
-        font-size: 10px;
-        color: #6b7280;
-        margin-bottom: 12px;
       }
     }
 
@@ -83,34 +73,31 @@
     }
   </style>
 
-  {{-- Print header — hanya muncul saat print --}}
-  <div class="print-header">
-    <div class="nama-perusahaan">PT. Mitra Mecca Abadi</div>
-    <div style="font-size:10px; color:#6b7280;">Sistem Manajemen Internal — Laporan Operasional</div>
-    <div class="print-judul">
-      @php
-        $judulPrint = match ($jenisLaporan) {
-          'fasilitas_kesehatan' => 'Fasilitas Kesehatan',
-          'kerja_sama_aktif' => 'Kerja Sama Aktif',
-          'kontrak_habis' => 'Kontrak Akan Berakhir',
-          'dokumen_expired' => 'Dokumen Expired / Segera Expired',
-          'jadwal_harian' => 'Jadwal Pengangkutan',
-          'realisasi_pengangkutan' => 'Realisasi Pengangkutan',
-          'armada' => 'Armada',
-          'petugas' => 'Petugas',
-          default => 'Laporan',
-        };
-      @endphp
-      {{ $judulPrint }}
-    </div>
-    <div class="print-meta">Dicetak: {{ now()->format('d/m/Y H:i') }} WIB &nbsp;|&nbsp; Total: {{ count($hasil) }} baris
+  {{-- Header cetak — hanya muncul saat print --}}
+  <div class="print-header" style="margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid #1d4ed8;">
+    <div style="font-size:14px; font-weight:bold; color:#1d4ed8;">PT. Mitra Mecca Abadi</div>
+    <div style="font-size:10px; color:#6b7280; margin-top:2px;">Sistem Manajemen Internal — Laporan Operasional</div>
+    <div style="font-size:13px; font-weight:bold; margin-top:10px;">{{ $judulAktif }}</div>
+    <div style="font-size:10px; color:#6b7280; margin-top:3px;">
+      Dicetak: {{ now()->format('d/m/Y H:i') }} WIB
+      &nbsp;|&nbsp; Total: {{ count($hasil) }} baris
+      @if ($ringkasanFilterAktif !== '')
+        &nbsp;|&nbsp; Filter: {{ $ringkasanFilterAktif }}
+      @endif
     </div>
   </div>
 
-  {{-- Konten halaman normal (bukan print) --}}
+  {{-- Page header (layar saja) --}}
   <div class="print-hidden">
     <x-page-header title="Laporan" description="Pilih jenis laporan dan filter yang diinginkan, lalu klik Tampilkan." />
   </div>
+
+  {{-- Flash info --}}
+  @if (session('info'))
+    <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 border border-blue-200 print-hidden">
+      {{ session('info') }}
+    </div>
+  @endif
 
   {{-- Panel Filter --}}
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-5 print-hidden">
@@ -129,7 +116,7 @@
         </select>
       </div>
 
-      {{-- Filter tanggal --}}
+      {{-- Filter tanggal — kerja_sama_aktif, jadwal_harian, realisasi --}}
       @if (in_array($jenisLaporan, ['kerja_sama_aktif', 'jadwal_harian', 'realisasi_pengangkutan']))
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Tanggal Dari</label>
@@ -143,7 +130,7 @@
         </div>
       @endif
 
-      {{-- Filter hari kontrak --}}
+      {{-- Filter hari — kontrak_habis --}}
       @if ($jenisLaporan === 'kontrak_habis')
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">
@@ -159,7 +146,7 @@
         </div>
       @endif
 
-      {{-- Filter status fasilitas --}}
+      {{-- Filter status + provinsi — fasilitas_kesehatan --}}
       @if ($jenisLaporan === 'fasilitas_kesehatan')
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status</label>
@@ -177,19 +164,19 @@
         </div>
       @endif
 
-      {{-- Filter status dokumen --}}
+      {{-- Filter status — dokumen_expired --}}
       @if ($jenisLaporan === 'dokumen_expired')
         <div>
-          <label class="block mb-2 text-sm font-medium text-gray-700">Filter Status</label>
+          <label class="block mb-2 text-sm font-medium text-gray-700">Tampilkan</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
                                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-            <option value="">Expired + Segera Expired</option>
-            <option value="expired">Hanya Expired</option>
+            <option value="">Expired + Segera Expired (30 hari)</option>
+            <option value="expired">Hanya yang Sudah Expired</option>
           </select>
         </div>
       @endif
 
-      {{-- Filter status jadwal --}}
+      {{-- Filter status — jadwal_harian --}}
       @if ($jenisLaporan === 'jadwal_harian')
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Jadwal</label>
@@ -205,7 +192,7 @@
         </div>
       @endif
 
-      {{-- Filter status armada --}}
+      {{-- Filter status — armada --}}
       @if ($jenisLaporan === 'armada')
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Armada</label>
@@ -218,7 +205,7 @@
         </div>
       @endif
 
-      {{-- Filter status petugas --}}
+      {{-- Filter status — petugas --}}
       @if ($jenisLaporan === 'petugas')
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Petugas</label>
@@ -233,7 +220,6 @@
 
     </div>
 
-    {{-- Tombol generate --}}
     <div class="flex items-center justify-end mt-5 pt-4 border-t border-gray-100">
       @if ($jenisLaporan !== '')
         <button wire:click="generate" wire:loading.attr="disabled" wire:target="generate" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white
@@ -262,17 +248,22 @@
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
 
       {{-- Header preview --}}
-      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 print-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3
+                            px-5 py-4 border-b border-gray-100 print-hidden">
         <div>
-          <h3 class="text-sm font-semibold text-gray-700">Hasil Laporan</h3>
+          <h3 class="text-sm font-semibold text-gray-700">{{ $judulAktif }}</h3>
           <p class="text-xs text-gray-400 mt-0.5">
-            Menampilkan {{ count($hasil) }} baris data
+            {{ count($hasil) }} baris data
+            @if ($ringkasanFilterAktif !== '')
+              &nbsp;·&nbsp; {{ $ringkasanFilterAktif }}
+            @endif
           </p>
         </div>
-        <div class="flex items-center gap-2">
 
-          {{-- Export Excel --}}
+        <div class="flex items-center gap-2 shrink-0">
           @if (count($hasil) > 0)
+
+            {{-- Excel --}}
             <button wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
                                            text-green-700 bg-green-50 border border-green-300 rounded-lg
                                            hover:bg-green-100 focus:ring-2 focus:ring-green-200
@@ -290,7 +281,7 @@
               <span wire:loading wire:target="exportExcel">Mengekspor...</span>
             </button>
 
-            {{-- Export PDF --}}
+            {{-- PDF --}}
             <button wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
                                            text-red-700 bg-red-50 border border-red-300 rounded-lg
                                            hover:bg-red-100 focus:ring-2 focus:ring-red-200
@@ -310,8 +301,8 @@
 
             {{-- Cetak --}}
             <button wire:click="cetakLaporan" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                           text-gray-700 bg-gray-50 border border-gray-300 rounded-lg
-                                           hover:bg-gray-100 focus:ring-2 focus:ring-gray-200
+                                           text-gray-700 bg-white border border-gray-300 rounded-lg
+                                           hover:bg-gray-50 focus:ring-2 focus:ring-gray-200
                                            transition-colors duration-150">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0
@@ -320,15 +311,14 @@
               </svg>
               Cetak
             </button>
-          @else
-            <span class="text-xs text-gray-300 cursor-not-allowed
-                                             border border-gray-200 rounded-lg px-3 py-1.5">Excel</span>
-            <span class="text-xs text-gray-300 cursor-not-allowed
-                                             border border-gray-200 rounded-lg px-3 py-1.5">PDF</span>
-            <span class="text-xs text-gray-300 cursor-not-allowed
-                                             border border-gray-200 rounded-lg px-3 py-1.5">Cetak</span>
-          @endif
 
+          @else
+            <span
+              class="text-xs text-gray-300 cursor-not-allowed border border-gray-200 rounded-lg px-3 py-1.5">Excel</span>
+            <span class="text-xs text-gray-300 cursor-not-allowed border border-gray-200 rounded-lg px-3 py-1.5">PDF</span>
+            <span
+              class="text-xs text-gray-300 cursor-not-allowed border border-gray-200 rounded-lg px-3 py-1.5">Cetak</span>
+          @endif
         </div>
       </div>
 
@@ -340,9 +330,7 @@
               <tr>
                 <th class="px-4 py-3 font-medium w-10">#</th>
                 @foreach ($kolom as $header)
-                  <th class="px-4 py-3 font-medium whitespace-nowrap">
-                    {{ $header }}
-                  </th>
+                  <th class="px-4 py-3 font-medium whitespace-nowrap">{{ $header }}</th>
                 @endforeach
               </tr>
             </thead>
@@ -352,9 +340,7 @@
                   <td class="px-4 py-3 text-xs text-gray-400">{{ $i + 1 }}</td>
                   @foreach ($baris as $sel)
                     <td class="px-4 py-3 text-sm text-gray-700 max-w-[200px]">
-                      <span class="block truncate" title="{{ $sel }}">
-                        {{ $sel }}
-                      </span>
+                      <span class="block truncate" title="{{ $sel }}">{{ $sel }}</span>
                     </td>
                   @endforeach
                 </tr>
@@ -363,7 +349,7 @@
           </table>
         </div>
         <div class="px-5 py-3 border-t border-gray-100 print-hidden">
-          <p class="text-xs text-gray-400">Total: {{ count($hasil) }} baris</p>
+          <p class="text-xs text-gray-400">Total: {{ count($hasil) }} baris data</p>
         </div>
       @else
         <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -373,8 +359,8 @@
                                            a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p class="text-sm font-medium text-gray-500">Tidak ada data ditemukan</p>
-          <p class="text-xs text-gray-400 mt-1">Coba ubah filter dan tampilkan ulang.</p>
+          <p class="text-sm font-medium text-gray-500">Tidak ada data untuk filter yang dipilih</p>
+          <p class="text-xs text-gray-400 mt-1">Coba ubah filter dan klik Tampilkan kembali.</p>
         </div>
       @endif
 
