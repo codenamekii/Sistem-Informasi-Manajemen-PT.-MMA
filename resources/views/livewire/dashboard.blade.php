@@ -1,5 +1,31 @@
 <div>
 
+  {{-- Flash error — dari middleware role.access dan guardAction --}}
+  @if (session('error'))
+    <div class="p-4 mb-5 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200
+                        flex items-start gap-3">
+      <svg class="w-5 h-5 shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ session('error') }}</span>
+    </div>
+  @endif
+
+  {{-- Flash info --}}
+  @if (session('info'))
+    <div class="p-4 mb-5 text-sm text-blue-800 rounded-lg bg-blue-50 border border-blue-200">
+      {{ session('info') }}
+    </div>
+  @endif
+
+  {{-- Flash success --}}
+  @if (session('success'))
+    <div class="p-4 mb-5 text-sm text-green-800 rounded-lg bg-green-50 border border-green-200">
+      {{ session('success') }}
+    </div>
+  @endif
+
   {{-- Page Header --}}
   <x-page-header title="Selamat datang, {{ auth()->user()->name }}"
     description="{{ now()->locale('id')->translatedFormat('l, d F Y') }} — Ringkasan operasional PT. Mitra Mecca Abadi" />
@@ -8,8 +34,7 @@
   <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
 
     <a href="{{ route('fasilitas-kesehatan.index') }}" class="block group">
-      <x-stat-card title="Fasilitas Kesehatan" :value="$totalFasilitas" description="Terdaftar di sistem" color="blue"
-        class="group-hover:border-blue-300 transition-colors duration-150">
+      <x-stat-card title="Fasilitas Kesehatan" :value="$totalFasilitas" description="Terdaftar di sistem" color="blue">
         <x-slot:icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -20,8 +45,7 @@
     </a>
 
     <a href="{{ route('kerja-sama.index') }}" class="block group">
-      <x-stat-card title="Kerja Sama Aktif" :value="$kerjaSamaAktif" description="Perjanjian berjalan" color="green"
-        class="group-hover:border-green-300 transition-colors duration-150">
+      <x-stat-card title="Kerja Sama Aktif" :value="$kerjaSamaAktif" description="Perjanjian berjalan" color="green">
         <x-slot:icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -33,8 +57,7 @@
 
     <a href="{{ route('dokumen.index') }}" class="block group">
       <x-stat-card title="Dokumen Expired" :value="$dokumenExpiredCount" description="Perlu perhatian"
-        color="{{ $dokumenExpiredCount > 0 ? 'red' : 'green' }}"
-        class="group-hover:border-red-300 transition-colors duration-150">
+        color="{{ $dokumenExpiredCount > 0 ? 'red' : 'green' }}">
         <x-slot:icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,8 +69,7 @@
 
     <a href="{{ route('jadwal-pengangkutan.index') }}" class="block group">
       <x-stat-card title="Jadwal Hari Ini" :value="$jadwalHariIniCount"
-        description="{{ now()->locale('id')->translatedFormat('d F') }}" color="yellow"
-        class="group-hover:border-yellow-300 transition-colors duration-150">
+        description="{{ now()->locale('id')->translatedFormat('d F') }}" color="yellow">
         <x-slot:icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -59,8 +81,7 @@
 
     <a href="{{ route('realisasi.index') }}" class="block group">
       <x-stat-card title="Bukti Kurang" :value="$buktiKurangCount" description="Realisasi belum lengkap"
-        color="{{ $buktiKurangCount > 0 ? 'red' : 'green' }}"
-        class="group-hover:border-orange-300 transition-colors duration-150">
+        color="{{ $buktiKurangCount > 0 ? 'red' : 'green' }}">
         <x-slot:icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -112,7 +133,7 @@
                 <p class="text-xs text-gray-500 mt-0.5">{{ $item['info'] }}</p>
               </div>
               <span class="ml-3 shrink-0 inline-flex items-center px-2 py-0.5 rounded-full
-                                         text-xs font-medium {{ $statusBadge }}">
+                                             text-xs font-medium {{ $statusBadge }}">
                 {{ $statusLabel }}
               </span>
             </div>
@@ -266,7 +287,9 @@
               </svg>
             </div>
             <p class="text-sm font-medium text-green-700">Semua dalam kondisi baik</p>
-            <p class="text-xs text-gray-400 mt-1">Tidak ada dokumen expired atau bukti yang perlu dilengkapi.</p>
+            <p class="text-xs text-gray-400 mt-1">
+              Tidak ada dokumen expired atau bukti yang perlu dilengkapi.
+            </p>
           </div>
         </div>
       @endif

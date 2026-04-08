@@ -3,6 +3,7 @@
 namespace App\Livewire\Laporan;
 
 use App\Exports\LaporanExport;
+use App\Livewire\Concerns\HasRoleGuard;
 use App\Models\Armada;
 use App\Models\Dokumen;
 use App\Models\FasilitasKesehatan;
@@ -20,6 +21,8 @@ use Maatwebsite\Excel\Facades\Excel;
 #[Layout('layouts.app')]
 class Index extends Component
 {
+  use HasRoleGuard;
+
   public string $jenisLaporan = '';
 
   public string $filterTanggalDari = '';
@@ -31,8 +34,6 @@ class Index extends Component
   public array $hasil = [];
   public array $kolom = [];
   public bool $sudahCari = false;
-
-  // Definisi jenis laporan
 
   public function getJenisOptions(): array
   {
@@ -64,9 +65,6 @@ class Index extends Component
     };
   }
 
-  /**
-   * Ringkasan filter — buat PDF, print, dan header preview.
-   */
   protected function ringkasanFilter(): string
   {
     $parts = [];
@@ -84,23 +82,15 @@ class Index extends Component
     if ($this->filterStatus !== '') {
       $parts[] = 'Status: ' . $this->filterStatus;
     }
-
     if ($this->filterProvinsi !== '') {
       $parts[] = 'Provinsi: ' . $this->filterProvinsi;
     }
-
     if ($this->jenisLaporan === 'kontrak_habis') {
       $parts[] = 'Dalam ' . $this->filterHari . ' hari ke depan';
     }
 
-    if (empty($parts)) {
-      return 'Semua data (tanpa filter tambahan)';
-    }
-
-    return implode(' | ', $parts);
+    return empty($parts) ? 'Semua data (tanpa filter tambahan)' : implode(' | ', $parts);
   }
-
-  // Reset
 
   public function updatedJenisLaporan(): void
   {
@@ -114,10 +104,11 @@ class Index extends Component
     $this->filterHari = '30';
   }
 
-  // Generate
-
   public function generate(): void
   {
+    if (!$this->guardAction('laporan'))
+      return;
+
     $this->sudahCari = true;
     $this->hasil = [];
     $this->kolom = [];
@@ -135,13 +126,13 @@ class Index extends Component
     };
   }
 
-  // Export Excel
-
   public function exportExcel(): mixed
   {
-    if ($this->jenisLaporan === '') {
+    if (!$this->guardAction('laporan'))
       return null;
-    }
+
+    if ($this->jenisLaporan === '')
+      return null;
 
     $this->generate();
 
@@ -159,14 +150,14 @@ class Index extends Component
     );
   }
 
-  // Export PDF
-
   #[Renderless]
   public function exportPdf(): mixed
   {
-    if ($this->jenisLaporan === '') {
+    if (!$this->guardAction('laporan'))
       return null;
-    }
+
+    if ($this->jenisLaporan === '')
+      return null;
 
     $this->generate();
 
@@ -191,26 +182,23 @@ class Index extends Component
     );
   }
 
-  // Cetak
-
   public function cetakLaporan(): void
   {
-    if ($this->jenisLaporan === '' || empty($this->hasil)) {
+    if (!$this->guardAction('laporan'))
       return;
-    }
+
+    if ($this->jenisLaporan === '' || empty($this->hasil))
+      return;
 
     $this->dispatch('do-print');
   }
-
-  // Query: Fasilitas Kesehatan
 
   protected function queryFasilitasKesehatan(): void
   {
     $this->kolom = ['Nama', 'Jenis Fasilitas', 'Kota/Kabupaten', 'Provinsi', 'Status', 'Nama PIC', 'Kendala'];
 
     $this->hasil = FasilitasKesehatan::query()
-      ->when($this->filterStatus !== '', fn($q) =>
-        $q->where('status', $this->filterStatus))
+      ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
       ->when($this->filterProvinsi !== '', fn($q) =>
         $q->where('provinsi', 'like', '%' . $this->filterProvinsi . '%'))
       ->orderBy('nama')
@@ -226,31 +214,27 @@ class Index extends Component
       ])->all();
   }
 
-  // Query: Kerja Sama Aktif
-
   protected function queryKerjaSamaAktif(): void
   {
     $this->kolom = ['No. Perjanjian', 'Nama Fasilitas', 'Tgl. Mulai', 'Tgl. Berakhir', 'Harga/kg (Rp)', 'Status'];
 
     $this->hasil = KerjaSama::with('fasilitasKesehatan')
-      ->where('status', 'aktif')
-      ->when($this->filterTanggalDari !== '', fn($q) =>
-        $q->where('tanggal_mulai', '>=', $this->filterTanggalDari))
-      ->when($this->filterTanggalSampai !== '', fn($q) =>
-        $q->where('tanggal_berakhir', '<=', $this->filterTanggalSampai))
+      ->where('status', 'active')
       ->orderBy('tanggal_berakhir')
       ->get()
       ->map(fn($ks) => [
         $ks->nomor_perjanjian,
         $ks->nama_fasilitas_display,
-        $ks->tanggal_mulai?->format('d/m/Y') ?: '—',
-        $ks->tanggal_berakhir?->format('d/m/Y') ?: '—',
+        $ks->tanggal_mulai
+        ? \Carbon\Carbon::parse($ks->tanggal_mulai)->format('d/m/Y')
+        : '—',
+        $ks->tanggal_berakhir
+        ? \Carbon\Carbon::parse($ks->tanggal_berakhir)->format('d/m/Y')
+        : '—',
         $ks->harga_per_kilogram_rupiah,
         $ks->status,
       ])->all();
   }
-
-  // Query: Kontrak Akan Habis
 
   protected function queryKontrakHabis(): void
   {
@@ -273,8 +257,6 @@ class Index extends Component
       ])->all();
   }
 
-  // Query: Dokumen Expired
-
   protected function queryDokumenExpired(): void
   {
     $this->kolom = ['Nama Dokumen', 'Kategori', 'No. Referensi', 'Terkait', 'Berlaku Sampai', 'Status'];
@@ -285,18 +267,13 @@ class Index extends Component
     $this->hasil = Dokumen::query()
       ->where(function ($q) use ($today, $batas) {
         $q->where('status', 'expired')
-          ->orWhere(function ($q2) use ($today) {
-            $q2->whereNotNull('tanggal_berlaku_sampai')
-              ->where('tanggal_berlaku_sampai', '<', $today);
-          })
-          ->orWhere(function ($q3) use ($today, $batas) {
-            $q3->whereNotNull('tanggal_berlaku_sampai')
-              ->whereBetween('tanggal_berlaku_sampai', [$today, $batas])
-              ->where('status', '!=', 'expired');
-          });
+          ->orWhere(fn($q2) => $q2->whereNotNull('tanggal_berlaku_sampai')
+            ->where('tanggal_berlaku_sampai', '<', $today))
+          ->orWhere(fn($q3) => $q3->whereNotNull('tanggal_berlaku_sampai')
+            ->whereBetween('tanggal_berlaku_sampai', [$today, $batas])
+            ->where('status', '!=', 'expired'));
       })
-      ->when($this->filterStatus !== '', fn($q) =>
-        $q->where('status', $this->filterStatus))
+      ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
       ->orderBy('tanggal_berlaku_sampai')
       ->get()
       ->map(fn($d) => [
@@ -309,8 +286,6 @@ class Index extends Component
       ])->all();
   }
 
-  // Query: Jadwal Pengangkutan
-
   protected function queryJadwalHarian(): void
   {
     $this->kolom = ['Kode Jadwal', 'Tgl. Pengangkutan', 'Fasilitas', 'Armada', 'Petugas PIC', 'Status'];
@@ -320,10 +295,8 @@ class Index extends Component
         $q->where('tanggal_pengangkutan', '>=', $this->filterTanggalDari))
       ->when($this->filterTanggalSampai !== '', fn($q) =>
         $q->where('tanggal_pengangkutan', '<=', $this->filterTanggalSampai))
-      ->when($this->filterStatus !== '', fn($q) =>
-        $q->where('status', $this->filterStatus))
-      ->orderBy('tanggal_pengangkutan')
-      ->orderBy('kode_jadwal')
+      ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
+      ->orderBy('tanggal_pengangkutan')->orderBy('kode_jadwal')
       ->get()
       ->map(fn($j) => [
         $j->kode_jadwal,
@@ -343,8 +316,6 @@ class Index extends Component
         },
       ])->all();
   }
-
-  // Query: Realisasi Pengangkutan
 
   protected function queryRealisasi(): void
   {
@@ -371,15 +342,12 @@ class Index extends Component
       ])->all();
   }
 
-  // Query: Armada
-
   protected function queryArmada(): void
   {
     $this->kolom = ['Kode Armada', 'No. Polisi', 'Jenis Kendaraan', 'Kapasitas (kg)', 'Status'];
 
     $this->hasil = Armada::query()
-      ->when($this->filterStatus !== '', fn($q) =>
-        $q->where('status', $this->filterStatus))
+      ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
       ->orderBy('nomor_polisi')
       ->get()
       ->map(fn($a) => [
@@ -391,15 +359,12 @@ class Index extends Component
       ])->all();
   }
 
-  // Query: Petugas
-
   protected function queryPetugas(): void
   {
     $this->kolom = ['Nama Petugas', 'Jabatan', 'No. Telepon', 'Wilayah Tugas', 'Status'];
 
     $this->hasil = Petugas::query()
-      ->when($this->filterStatus !== '', fn($q) =>
-        $q->where('status', $this->filterStatus))
+      ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
       ->orderBy('nama_petugas')
       ->get()
       ->map(fn($p) => [

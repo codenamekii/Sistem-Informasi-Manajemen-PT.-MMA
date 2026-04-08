@@ -117,16 +117,16 @@
       </div>
 
       {{-- Filter tanggal — kerja_sama_aktif, jadwal_harian, realisasi --}}
-      @if (in_array($jenisLaporan, ['kerja_sama_aktif', 'jadwal_harian', 'realisasi_pengangkutan']))
+      @if (in_array($jenisLaporan, ['jadwal_harian', 'realisasi_pengangkutan']))
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Tanggal Dari</label>
           <input type="date" wire:model="filterTanggalDari" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
         </div>
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Tanggal Sampai</label>
           <input type="date" wire:model="filterTanggalSampai" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
         </div>
       @endif
 
@@ -137,7 +137,7 @@
             Tampilkan kontrak berakhir dalam
           </label>
           <select wire:model="filterHari" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="14">14 hari ke depan</option>
             <option value="30">30 hari ke depan</option>
             <option value="60">60 hari ke depan</option>
@@ -151,7 +151,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="">Semua Status</option>
             <option value="aktif">Aktif</option>
             <option value="nonaktif">Nonaktif</option>
@@ -160,7 +160,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Provinsi</label>
           <input type="text" wire:model="filterProvinsi" placeholder="Contoh: Sulawesi Selatan" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
         </div>
       @endif
 
@@ -169,7 +169,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Tampilkan</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="">Expired + Segera Expired (30 hari)</option>
             <option value="expired">Hanya yang Sudah Expired</option>
           </select>
@@ -181,7 +181,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Jadwal</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="">Semua Status</option>
             <option value="draft">Draft</option>
             <option value="scheduled">Terjadwal</option>
@@ -197,7 +197,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Armada</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="">Semua Status</option>
             <option value="aktif">Aktif</option>
             <option value="nonaktif">Nonaktif</option>
@@ -210,7 +210,7 @@
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">Status Petugas</label>
           <select wire:model="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             <option value="">Semua Status</option>
             <option value="aktif">Aktif</option>
             <option value="nonaktif">Nonaktif</option>
@@ -223,12 +223,12 @@
     <div class="flex items-center justify-end mt-5 pt-4 border-t border-gray-100">
       @if ($jenisLaporan !== '')
         <button wire:click="generate" wire:loading.attr="disabled" wire:target="generate" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white
-                               bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
-                               transition-colors duration-200 disabled:opacity-60">
+                                 bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+                                 transition-colors duration-200 disabled:opacity-60">
           <svg wire:loading.remove wire:target="generate" class="w-4 h-4" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                                   a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                     a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <svg wire:loading wire:target="generate" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -249,7 +249,7 @@
 
       {{-- Header preview --}}
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3
-                            px-5 py-4 border-b border-gray-100 print-hidden">
+                              px-5 py-4 border-b border-gray-100 print-hidden">
         <div>
           <h3 class="text-sm font-semibold text-gray-700">{{ $judulAktif }}</h3>
           <p class="text-xs text-gray-400 mt-0.5">
@@ -265,9 +265,9 @@
 
             {{-- Excel --}}
             <button wire:click="exportExcel" wire:loading.attr="disabled" wire:target="exportExcel" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                           text-green-700 bg-green-50 border border-green-300 rounded-lg
-                                           hover:bg-green-100 focus:ring-2 focus:ring-green-200
-                                           transition-colors duration-150 disabled:opacity-60">
+                                               text-green-700 bg-green-50 border border-green-300 rounded-lg
+                                               hover:bg-green-100 focus:ring-2 focus:ring-green-200
+                                               transition-colors duration-150 disabled:opacity-60">
               <svg wire:loading.remove wire:target="exportExcel" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -283,13 +283,13 @@
 
             {{-- PDF --}}
             <button wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                           text-red-700 bg-red-50 border border-red-300 rounded-lg
-                                           hover:bg-red-100 focus:ring-2 focus:ring-red-200
-                                           transition-colors duration-150 disabled:opacity-60">
+                                               text-red-700 bg-red-50 border border-red-300 rounded-lg
+                                               hover:bg-red-100 focus:ring-2 focus:ring-red-200
+                                               transition-colors duration-150 disabled:opacity-60">
               <svg wire:loading.remove wire:target="exportPdf" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0
-                                               0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                   0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
               <svg wire:loading wire:target="exportPdf" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -301,13 +301,13 @@
 
             {{-- Cetak --}}
             <button wire:click="cetakLaporan" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
-                                           text-gray-700 bg-white border border-gray-300 rounded-lg
-                                           hover:bg-gray-50 focus:ring-2 focus:ring-gray-200
-                                           transition-colors duration-150">
+                                               text-gray-700 bg-white border border-gray-300 rounded-lg
+                                               hover:bg-gray-50 focus:ring-2 focus:ring-gray-200
+                                               transition-colors duration-150">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0
-                                               002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0
-                                               002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                   002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0
+                                                   002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
               Cetak
             </button>
@@ -356,7 +356,7 @@
           <div class="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                                           a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                               a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <p class="text-sm font-medium text-gray-500">Tidak ada data untuk filter yang dipilih</p>
@@ -372,7 +372,7 @@
         <div class="flex items-center justify-center w-14 h-14 bg-blue-50 rounded-full mb-4">
           <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                                   a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                     a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
         <p class="text-sm font-medium text-gray-500">Pilih jenis laporan di atas</p>
