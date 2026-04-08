@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\JadwalPengangkutan;
+namespace App\Livewire\Realisasi;
 
 use App\Models\JadwalPengangkutan;
 use Illuminate\Contracts\View\View;
@@ -9,19 +9,17 @@ use Livewire\Component;
 
 class Index extends Component
 {
-    public string $search         = '';
-    public string $filterStatus   = '';   // draft|scheduled|in_progress|completed|cancelled
-    public string $filterKoneksi  = '';   // connected|legacy
-    public string $filterBukti    = '';   // lengkap|belum|bukan_completed
+    public string $search       = '';
+    public string $filterBukti  = ''; // lengkap|belum
 
     // ─── Computed: data tabel ─────────────────────────────
 
-    public function getJadwalProperty(): array
+    public function getRealisasiProperty(): array
     {
         return $this->tableQuery()
             ->with(['kerjaSama.fasilitasKesehatan', 'armadaRelasi', 'petugas'])
-            ->orderBy('tanggal_pengangkutan')
-            ->orderBy('kode_jadwal')
+            ->orderByDesc('tanggal_realisasi')
+            ->orderByDesc('tanggal_pengangkutan')
             ->get()
             ->map(function (JadwalPengangkutan $jadwal): array {
 
@@ -33,12 +31,12 @@ class Index extends Component
                     'id'                     => $jadwal->id,
                     'kode_jadwal'            => $jadwal->kode_jadwal,
                     'tanggal_pengangkutan'   => $jadwal->tanggal_pengangkutan?->format('d/m/Y'),
+                    'tanggal_realisasi'      => $jadwal->tanggal_realisasi?->format('d/m/Y') ?: '—',
                     'nama_fasilitas_display' => $jadwal->nama_fasilitas_display,
                     'armada_display'         => $jadwal->armada_display,
                     'petugas_display'        => $petugasDisplay,
-                    'is_connected'           => ! is_null($jadwal->kerja_sama_id),
-                    'status'                 => $jadwal->status,
                     'has_bukti_lengkap'      => $jadwal->has_bukti_lengkap,
+                    'is_connected'           => ! is_null($jadwal->kerja_sama_id),
                 ];
             })
             ->values()
@@ -47,42 +45,27 @@ class Index extends Component
 
     // ─── Computed: stat cards ─────────────────────────────
 
-    public function getTotalProperty(): int
+    public function getTotalRealisasiProperty(): int
     {
-        return JadwalPengangkutan::count();
+        return JadwalPengangkutan::realisasi()->count();
     }
 
-    public function getScheduledProperty(): int
+    public function getBuktiLengkapProperty(): int
     {
-        return JadwalPengangkutan::where('status', 'scheduled')->count();
+        return JadwalPengangkutan::buktiLengkap()->count();
     }
 
-    public function getInProgressProperty(): int
+    public function getBuktiBelumLengkapProperty(): int
     {
-        return JadwalPengangkutan::where('status', 'in_progress')->count();
+        return JadwalPengangkutan::buktiBelumLengkap()->count();
     }
 
-    public function getCompletedProperty(): int
-    {
-        return JadwalPengangkutan::where('status', 'completed')->count();
-    }
-
-    public function getCompletedWithBuktiProperty(): int
-    {
-        return JadwalPengangkutan::where('status', 'completed')
-            ->whereNotNull('manifest_elektronik_path')
-            ->whereNotNull('bukti_foto_pengangkutan_path')
-            ->count();
-    }
-
-    // ─── Reset filter ─────────────────────────────────────
+    // ─── Reset ────────────────────────────────────────────
 
     public function resetFilters(): void
     {
-        $this->search        = '';
-        $this->filterStatus  = '';
-        $this->filterKoneksi = '';
-        $this->filterBukti   = '';
+        $this->search      = '';
+        $this->filterBukti = '';
     }
 
     // ─── Query ────────────────────────────────────────────
@@ -91,64 +74,38 @@ class Index extends Component
     {
         $search = trim($this->search);
 
-        return JadwalPengangkutan::query()
-
-            // Search
+        return JadwalPengangkutan::realisasi()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $q) use ($search): void {
                     $q->where('kode_jadwal', 'like', "%{$search}%")
                         ->orWhere('nama_fasilitas', 'like', "%{$search}%")
                         ->orWhere('armada', 'like', "%{$search}%")
                         ->orWhere('petugas_pic', 'like', "%{$search}%")
-                        ->orWhere('status', 'like', "%{$search}%")
                         ->orWhereHas('kerjaSama', function (Builder $ks) use ($search): void {
                             $ks->where('nomor_perjanjian', 'like', "%{$search}%")
                                 ->orWhereHas('fasilitasKesehatan', function (Builder $f) use ($search): void {
                                     $f->where('nama', 'like', "%{$search}%");
                                 });
                         })
-                        ->orWhereHas('armadaRelasi', function (Builder $arm) use ($search): void {
-                            $arm->where('nomor_polisi', 'like', "%{$search}%");
-                        })
                         ->orWhereHas('petugas', function (Builder $p) use ($search): void {
                             $p->where('nama_petugas', 'like', "%{$search}%");
                         });
                 });
             })
-
-            // Filter status
-            ->when($this->filterStatus !== '', function (Builder $q): void {
-                $q->where('status', $this->filterStatus);
-            })
-
-            // Filter koneksi
-            ->when($this->filterKoneksi === 'connected', function (Builder $q): void {
-                $q->whereNotNull('kerja_sama_id');
-            })
-            ->when($this->filterKoneksi === 'legacy', function (Builder $q): void {
-                $q->whereNull('kerja_sama_id');
-            })
-
-            // Filter bukti
             ->when($this->filterBukti === 'lengkap', function (Builder $q): void {
-                $q->where('status', 'completed')
-                    ->whereNotNull('manifest_elektronik_path')
+                $q->whereNotNull('manifest_elektronik_path')
                     ->whereNotNull('bukti_foto_pengangkutan_path');
             })
             ->when($this->filterBukti === 'belum', function (Builder $q): void {
-                $q->where('status', 'completed')
-                    ->where(function (Builder $q): void {
-                        $q->whereNull('manifest_elektronik_path')
-                            ->orWhereNull('bukti_foto_pengangkutan_path');
-                    });
-            })
-            ->when($this->filterBukti === 'bukan_completed', function (Builder $q): void {
-                $q->where('status', '!=', 'completed');
+                $q->where(function (Builder $q): void {
+                    $q->whereNull('manifest_elektronik_path')
+                        ->orWhereNull('bukti_foto_pengangkutan_path');
+                });
             });
     }
 
     public function render(): View
     {
-        return view('livewire.jadwal-pengangkutan.index');
+        return view('livewire.realisasi.index');
     }
 }

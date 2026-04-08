@@ -2,69 +2,86 @@
 
 namespace App\Livewire\Dokumen;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
 use App\Models\Dokumen;
+use App\Models\KerjaSama;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
 
-#[Layout('layouts.app')]
-#[Title('Tambah Dokumen')]
 class Create extends Component
 {
-    #[Validate('required|string|max:255')]
-    public string $nama_dokumen = '';
-
-    #[Validate('required|string|max:100')]
-    public string $kategori_dokumen = '';
-
-    #[Validate('nullable|string|max:100')]
-    public ?string $nomor_referensi = null;
-
-    #[Validate('required|string|max:255')]
-    public string $terkait_dengan = '';
-
-    #[Validate('nullable|date')]
-    public ?string $tanggal_berlaku_sampai = null;
-
-    #[Validate('required|in:valid,expiring_soon,expired,missing')]
-    public string $status = 'valid';
-
-    public array $kategoriOptions = [
-        'Perjanjian',
-        'MOU',
-        'Izin',
-        'Sertifikat',
-        'Lingkungan',
-        'Lainnya',
+    public array $form = [
+        'nama_dokumen' => '',
+        'kategori_dokumen' => '',
+        'nomor_referensi' => '',
+        'kerja_sama_id' => '',
+        'tanggal_berlaku_sampai' => '',
+        'status' => 'valid',
     ];
 
-    public array $statusOptions = [
-        'valid'         => 'Valid',
-        'expiring_soon' => 'Segera Berakhir',
-        'expired'       => 'Kadaluarsa',
-        'missing'       => 'Tidak Ada',
-    ];
-
-    public function save(): void
+    public function getKerjaSamaOptionsProperty(): Collection
     {
-        $this->validate();
+        return KerjaSama::query()
+            ->with('fasilitasKesehatan:id,nama')
+            ->orderByDesc('tanggal_mulai')
+            ->orderBy('nomor_perjanjian')
+            ->get();
+    }
 
-        Dokumen::create([
-            'nama_dokumen'           => $this->nama_dokumen,
-            'kategori_dokumen'       => $this->kategori_dokumen,
-            'nomor_referensi'        => $this->nomor_referensi ?: null,
-            'terkait_dengan'         => $this->terkait_dengan,
-            'tanggal_berlaku_sampai' => $this->tanggal_berlaku_sampai ?: null,
-            'status'                 => $this->status,
+    public function updatedFormKategoriDokumen($value): void
+    {
+        if (! in_array($value, ['perjanjian', 'MoU'], true)) {
+            $this->form['kerja_sama_id'] = '';
+        }
+    }
+
+    protected function requiresKerjaSama(): bool
+    {
+        return in_array($this->form['kategori_dokumen'] ?? '', ['perjanjian', 'MoU'], true);
+    }
+
+    public function save()
+    {
+        $validated = $this->validate([
+            'form.nama_dokumen' => ['required', 'string', 'max:255'],
+            'form.kategori_dokumen' => ['required', 'in:perjanjian,MoU,izin,legalitas,administrasi,lainnya'],
+            'form.nomor_referensi' => ['required', 'string', 'max:255'],
+            'form.kerja_sama_id' => [
+                Rule::requiredIf(fn() => $this->requiresKerjaSama()),
+                'nullable',
+                'integer',
+                'exists:kerja_samas,id',
+            ],
+            'form.tanggal_berlaku_sampai' => ['nullable', 'date'],
+            'form.status' => ['required', 'in:valid,expiring_soon,expired,missing'],
         ]);
+
+        $payload = [
+            'nama_dokumen' => $validated['form']['nama_dokumen'],
+            'kategori_dokumen' => $validated['form']['kategori_dokumen'],
+            'nomor_referensi' => $validated['form']['nomor_referensi'],
+            'tanggal_berlaku_sampai' => $validated['form']['tanggal_berlaku_sampai'] ?: null,
+            'status' => $validated['form']['status'],
+            'kerja_sama_id' => null,
+            'terkait_dengan' => null,
+        ];
+
+        if ($this->requiresKerjaSama()) {
+            $kerjaSama = KerjaSama::with('fasilitasKesehatan')->findOrFail($validated['form']['kerja_sama_id']);
+
+            $payload['kerja_sama_id'] = $kerjaSama->id;
+            $payload['terkait_dengan'] = $kerjaSama->nomor_perjanjian . ' - ' . $kerjaSama->nama_fasilitas_display;
+        }
+
+        Dokumen::create($payload);
 
         session()->flash('success', 'Dokumen berhasil ditambahkan.');
 
-        $this->redirect(route('dokumen.index'), navigate: false);
+        return redirect()->route('dokumen.index');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.dokumen.create');
     }

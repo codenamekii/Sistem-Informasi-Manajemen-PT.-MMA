@@ -2,56 +2,65 @@
 
 namespace App\Livewire\KerjaSama;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
+use App\Models\FasilitasKesehatan;
 use App\Models\KerjaSama;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
 
-#[Layout('layouts.app')]
-#[Title('Tambah Kerja Sama')]
 class Create extends Component
 {
-    #[Validate('required|string|max:100|unique:kerja_samas,nomor_perjanjian')]
-    public string $nomor_perjanjian = '';
-
-    #[Validate('required|string|max:255')]
-    public string $nama_fasilitas_kesehatan = '';
-
-    #[Validate('required|date')]
-    public string $tanggal_mulai = '';
-
-    #[Validate('required|date|after_or_equal:tanggal_mulai')]
-    public string $tanggal_berakhir = '';
-
-    #[Validate('required|in:draft,active,expired,terminated')]
-    public string $status = 'draft';
-
-    public array $statusOptions = [
-        'draft'      => 'Draft',
-        'active'     => 'Aktif',
-        'expired'    => 'Kadaluarsa',
-        'terminated' => 'Dihentikan',
+    public array $form = [
+        'nomor_perjanjian' => '',
+        'fasilitas_kesehatan_id' => '',
+        'harga_per_kilogram' => '',
+        'tanggal_mulai' => '',
+        'tanggal_berakhir' => '',
+        'status' => 'draft',
     ];
 
-    public function save(): void
+    public function getFasilitasOptionsProperty(): Collection
     {
-        $this->validate();
-
-        KerjaSama::create([
-            'nomor_perjanjian'        => $this->nomor_perjanjian,
-            'nama_fasilitas_kesehatan' => $this->nama_fasilitas_kesehatan,
-            'tanggal_mulai'           => $this->tanggal_mulai,
-            'tanggal_berakhir'        => $this->tanggal_berakhir,
-            'status'                  => $this->status,
-        ]);
-
-        session()->flash('success', 'Data kerja sama berhasil ditambahkan.');
-
-        $this->redirect(route('kerja-sama.index'), navigate: false);
+        return FasilitasKesehatan::query()
+            ->orderBy('nama')
+            ->get(['id', 'nama']);
     }
 
-    public function render()
+    public function save()
+    {
+        $validated = $this->validate([
+            'form.nomor_perjanjian' => ['required', 'string', 'max:255'],
+            'form.fasilitas_kesehatan_id' => [
+                'required',
+                'integer',
+                'exists:fasilitas_kesehatans,id',
+                Rule::unique('kerja_samas', 'fasilitas_kesehatan_id'),
+            ],
+            'form.harga_per_kilogram' => ['required', 'numeric', 'min:0'],
+            'form.tanggal_mulai' => ['required', 'date'],
+            'form.tanggal_berakhir' => ['required', 'date', 'after_or_equal:form.tanggal_mulai'],
+            'form.status' => ['required', 'in:draft,active,expired,terminated'],
+        ]);
+
+        $fasilitas = FasilitasKesehatan::findOrFail($validated['form']['fasilitas_kesehatan_id']);
+
+        KerjaSama::create([
+            'nomor_perjanjian' => $validated['form']['nomor_perjanjian'],
+            'fasilitas_kesehatan_id' => $fasilitas->id,
+            'nama_fasilitas_kesehatan' => $fasilitas->nama,
+            'harga_per_kilogram' => $validated['form']['harga_per_kilogram'],
+            'tanggal_mulai' => $validated['form']['tanggal_mulai'],
+            'tanggal_berakhir' => $validated['form']['tanggal_berakhir'],
+            'status' => $validated['form']['status'],
+        ]);
+
+        session()->flash('success', 'Kerja sama berhasil ditambahkan.');
+
+        return redirect()->route('kerja-sama.index');
+    }
+
+    public function render(): View
     {
         return view('livewire.kerja-sama.create');
     }

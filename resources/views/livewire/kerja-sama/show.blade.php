@@ -128,82 +128,147 @@
         </div>
 
         {{-- Field Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0
-                    sm:divide-x divide-gray-100">
+        {{-- Informasi Utama (REPLACE FIELD GRID) --}}
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 space-y-6">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Informasi Utama</h3>
+                    </div>
 
-            <div class="px-5 py-4">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Nomor Perjanjian
-                </p>
-                <p class="text-sm font-medium text-gray-800 font-mono">
-                    {{ $kerjaSama->nomor_perjanjian }}
-                </p>
+                    <dl class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Nomor Perjanjian</dt>
+                            <dd class="mt-1 text-sm font-semibold text-gray-900">
+                                {{ $kerjaSama->nomor_perjanjian }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Fasilitas Kesehatan
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $kerjaSama->nama_fasilitas_display }}
+                            </dd>
+
+                            @if ($kerjaSama->is_connected_to_fasilitas)
+                            <p class="mt-1 text-xs text-gray-500">
+                                Tersambung ke data fasilitas kesehatan
+                            </p>
+                            @else
+                            <p class="mt-1 text-xs text-amber-600">
+                                Masih memakai nama fasilitas lama
+                            </p>
+                            @endif
+                        </div>
+
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Harga per Kilogram
+                            </dt>
+                            <dd class="mt-1 text-sm font-semibold text-gray-900">
+                                {{ $kerjaSama->harga_per_kilogram_rupiah }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Status</dt>
+                            <dd class="mt-1">
+                                @php
+                                $badge = match($kerjaSama->status) {
+                                'draft' => 'bg-gray-100 text-gray-600',
+                                'active' => 'bg-green-100 text-green-700',
+                                'expired' => 'bg-yellow-100 text-yellow-700',
+                                'terminated' => 'bg-red-100 text-red-700',
+                                default => 'bg-gray-100 text-gray-500',
+                                };
+
+                                $label = match($kerjaSama->status) {
+                                'draft' => 'Draft',
+                                'active' => 'Aktif',
+                                'expired' => 'Expired',
+                                'terminated' => 'Terminated',
+                                default => $kerjaSama->status,
+                                };
+                                @endphp
+
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $badge }}">
+                                    {{ $label }}
+                                </span>
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Tanggal Mulai</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($kerjaSama->tanggal_mulai)->format('d/m/Y') ?: '—' }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Tanggal Berakhir</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($kerjaSama->tanggal_berakhir)->format('d/m/Y') ?: '—' }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
             </div>
 
-            <div class="px-5 py-4">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Fasilitas Kesehatan
-                </p>
-                <p class="text-sm font-medium text-gray-800">
-                    {{ $kerjaSama->nama_fasilitas_kesehatan }}
-                </p>
-            </div>
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Status Koneksi</h3>
+                    </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Tanggal Mulai
-                </p>
-                <p class="text-sm font-medium text-gray-800">
-                    {{ $kerjaSama->tanggal_mulai->format('d/m/Y') }}
-                </p>
-            </div>
+                    <div class="px-5 py-4">
+                        @if ($kerjaSama->is_connected_to_fasilitas)
+                        <div class="space-y-2">
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                Sudah Tersambung
+                            </span>
+                            <p class="text-sm text-gray-600">
+                                Record ini sudah menggunakan relasi ke data Fasilitas Kesehatan.
+                            </p>
+                        </div>
+                        @else
+                        <div class="space-y-2">
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                Masih Data Lama
+                            </span>
+                            <p class="text-sm text-gray-600">
+                                Record ini masih mengandalkan kolom nama fasilitas lama dan belum tersambung ke relasi
+                                fasilitas.
+                            </p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Tanggal Berakhir
-                </p>
-                <p class="text-sm font-medium text-gray-800">
-                    {{ $kerjaSama->tanggal_berakhir->format('d/m/Y') }}
-                </p>
-            </div>
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Metadata</h3>
+                    </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Status
-                </p>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full
-                             text-xs font-medium {{ $badge }}">
-                    {{ $label }}
-                </span>
-            </div>
+                    <dl class="px-5 py-4 space-y-4">
+                        <div>
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Dibuat</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($kerjaSama->created_at)->format('d/m/Y H:i') ?: '—' }}
+                            </dd>
+                        </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Durasi Perjanjian
-                </p>
-                <p class="text-sm font-medium text-gray-800">
-                    {{ $kerjaSama->tanggal_mulai->diffInDays($kerjaSama->tanggal_berakhir) }} hari
-                </p>
+                        <div>
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Diperbarui</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($kerjaSama->updated_at)->format('d/m/Y H:i') ?: '—' }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
             </div>
-
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Tanggal Ditambahkan
-                </p>
-                <p class="text-sm text-gray-800">
-                    {{ $kerjaSama->created_at->format('d/m/Y H:i') }}
-                </p>
-            </div>
-
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Terakhir Diperbarui
-                </p>
-                <p class="text-sm text-gray-800">
-                    {{ $kerjaSama->updated_at->format('d/m/Y H:i') }}
-                </p>
-            </div>
-
         </div>
 
         {{-- Card Footer --}}

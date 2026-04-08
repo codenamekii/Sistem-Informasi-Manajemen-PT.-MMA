@@ -180,80 +180,189 @@
         </div>
 
         {{-- Field Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0
-                    sm:divide-x divide-gray-100">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-2 space-y-6">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Informasi Utama</h3>
+                    </div>
 
-            <div class="px-5 py-4">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Nama Dokumen
-                </p>
-                <p class="text-sm font-medium text-gray-800">{{ $dokumen->nama_dokumen }}</p>
+                    <dl class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Nama Dokumen</dt>
+                            <dd class="mt-1 text-sm font-semibold text-gray-900">
+                                {{ $dokumen->nama_dokumen }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Kategori Dokumen</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $dokumen->kategori_dokumen }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Nomor Referensi</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ $dokumen->nomor_referensi }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Tanggal Berlaku Sampai
+                            </dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($dokumen->tanggal_berlaku_sampai)->format('d/m/Y') ?: '—' }}
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b md:border-r border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Status</dt>
+                            <dd class="mt-1">
+                                @php
+                                $badge = match($dokumen->status) {
+                                'valid' => 'bg-green-100 text-green-700',
+                                'expiring_soon' => 'bg-yellow-100 text-yellow-700',
+                                'expired' => 'bg-red-100 text-red-700',
+                                'missing' => 'bg-gray-100 text-gray-600',
+                                default => 'bg-gray-100 text-gray-500',
+                                };
+
+                                $label = match($dokumen->status) {
+                                'valid' => 'Valid',
+                                'expiring_soon' => 'Segera Berakhir',
+                                'expired' => 'Expired',
+                                'missing' => 'Missing',
+                                default => $dokumen->status,
+                                };
+                                @endphp
+
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $badge }}">
+                                    {{ $label }}
+                                </span>
+                            </dd>
+                        </div>
+
+                        <div class="px-5 py-4 border-b border-gray-100">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Sumber Keterkaitan
+                            </dt>
+                            <dd class="mt-1">
+                                @if ($dokumen->is_connected_to_kerja_sama)
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                    Tersambung ke Kerja Sama
+                                </span>
+                                @else
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                    Masih Data Lama
+                                </span>
+                                @endif
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Keterkaitan Dokumen</h3>
+                    </div>
+
+                    <div class="px-5 py-4 space-y-4">
+                        <div>
+                            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Terkait</p>
+                            <p class="mt-1 text-sm text-gray-900">
+                                {{ $dokumen->kerja_sama_display }}
+                            </p>
+                        </div>
+
+                        @if ($dokumen->is_connected_to_kerja_sama && $dokumen->kerjaSama)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Nomor Perjanjian
+                                </p>
+                                <p class="mt-1 text-sm text-gray-900">
+                                    {{ $dokumen->kerjaSama->nomor_perjanjian }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Fasilitas Kesehatan
+                                </p>
+                                <p class="mt-1 text-sm text-gray-900">
+                                    {{ $dokumen->kerjaSama->fasilitasKesehatan?->nama ?:
+                                    ($dokumen->kerjaSama->nama_fasilitas_kesehatan ?: '—') }}
+                                </p>
+                            </div>
+                        </div>
+                        @else
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                            <p class="text-sm text-amber-800">
+                                Dokumen ini belum tersambung ke relasi Kerja Sama. Sistem masih memakai nilai lama pada
+                                field
+                                <span class="font-medium">terkait_dengan</span>.
+                            </p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
             </div>
 
-            <div class="px-5 py-4">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Kategori
-                </p>
-                <p class="text-sm font-medium text-gray-800">{{ $dokumen->kategori_dokumen }}</p>
-            </div>
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Status Koneksi</h3>
+                    </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Nomor Referensi
-                </p>
-                <p class="text-sm font-medium text-gray-800 font-mono">
-                    {{ $dokumen->nomor_referensi ?? '—' }}
-                </p>
-            </div>
+                    <div class="px-5 py-4">
+                        @if ($dokumen->is_connected_to_kerja_sama)
+                        <div class="space-y-2">
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                Sudah Tersambung
+                            </span>
+                            <p class="text-sm text-gray-600">
+                                Dokumen ini sudah menggunakan relasi ke data Kerja Sama.
+                            </p>
+                        </div>
+                        @else
+                        <div class="space-y-2">
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                Belum Tersambung
+                            </span>
+                            <p class="text-sm text-gray-600">
+                                Dokumen ini masih mengandalkan data lama dan belum terhubung ke relasi Kerja Sama.
+                            </p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Terkait Dengan
-                </p>
-                <p class="text-sm font-medium text-gray-800">{{ $dokumen->terkait_dengan }}</p>
-            </div>
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-700">Metadata</h3>
+                    </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Berlaku Sampai
-                </p>
-                <p class="text-sm font-medium text-gray-800">
-                    @if ($dokumen->tanggal_berlaku_sampai)
-                    {{ $dokumen->tanggal_berlaku_sampai->format('d/m/Y') }}
-                    @else
-                    <span class="text-gray-400">Tidak ditentukan</span>
-                    @endif
-                </p>
-            </div>
+                    <dl class="px-5 py-4 space-y-4">
+                        <div>
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Dibuat</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($dokumen->created_at)->format('d/m/Y H:i') ?: '—' }}
+                            </dd>
+                        </div>
 
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Status
-                </p>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full
-                             text-xs font-medium {{ $badge }}">
-                    {{ $label }}
-                </span>
+                        <div>
+                            <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Diperbarui</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ optional($dokumen->updated_at)->format('d/m/Y H:i') ?: '—' }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
             </div>
-
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Tanggal Ditambahkan
-                </p>
-                <p class="text-sm text-gray-800">
-                    {{ $dokumen->created_at->format('d/m/Y H:i') }}
-                </p>
-            </div>
-
-            <div class="px-5 py-4 border-t border-gray-100">
-                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                    Terakhir Diperbarui
-                </p>
-                <p class="text-sm text-gray-800">
-                    {{ $dokumen->updated_at->format('d/m/Y H:i') }}
-                </p>
-            </div>
-
         </div>
 
         {{-- Card Footer --}}
