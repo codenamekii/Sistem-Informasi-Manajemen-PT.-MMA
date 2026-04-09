@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PT. Mitra Mecca Abadi — Transporter Limbah B3</title>
+    <meta name="description"
+      content="PT. Mitra Mecca Abadi — Perusahaan transporter Limbah B3 yang profesional, aman, dan terpercaya. Melayani pengangkutan dan pengelolaan Limbah Bahan Berbahaya dan Beracun di Indonesia.">
+    <meta name="keywords"
+      content="transporter limbah B3, pengangkutan limbah berbahaya, pengelolaan limbah infeksius, PT Mitra Mecca Abadi, Makassar">
+    <meta property="og:title" content="PT. Mitra Mecca Abadi — Transporter Limbah B3">
+    <meta property="og:description"
+      content="Perusahaan transporter Limbah B3 yang profesional, aman, dan terpercaya di Indonesia.">
+    <meta property="og:url" content="https://mitrameccaabadi.com">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://mitrameccaabadi.com">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-[#f3f3f1] text-neutral-900 antialiased">
