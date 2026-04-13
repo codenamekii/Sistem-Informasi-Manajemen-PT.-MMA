@@ -39,7 +39,7 @@
                 <div class="max-w-xl">
                     <div class="inline-flex rounded-full border border-neutral-300 bg-white/80 px-4
                                 py-1.5 text-sm font-medium text-neutral-700 shadow-sm backdrop-blur">
-                        Sistem Informasi Manajemen Limbah Infeksius
+                        Sistem Informasi Manajemen Internal
                     </div>
                     <h1 class="mt-6 text-5xl font-black leading-tight tracking-tight text-neutral-900">
                         Sistem manajemen internal PT. Mitra Mecca Abadi.
@@ -143,17 +143,18 @@
                                     </svg>
                                 </span>
                                 <input
-                                    id="password"
-                                    :type="showPassword ? 'text' : 'password'"
-                                    name="password"
-                                    required
-                                    autocomplete="current-password"
-                                    placeholder="••••••••"
-                                    class="w-full rounded-2xl border py-4 pl-12 pr-12 text-base
-                                           text-neutral-900 outline-none transition
-                                           placeholder:text-neutral-400
-                                           focus:border-red-300 focus:bg-white focus:ring-4 focus:ring-red-100
-                                           @error('password') border-red-400 bg-red-50 @else border-neutral-200 bg-neutral-50 @enderror">
+                                  id="password"
+                                  type="password"
+                                  x-bind:type="showPassword ? 'text' : 'password'"
+                                  name="password"
+                                  required
+                                  autocomplete="current-password"
+                                  placeholder="••••••••"
+                                  class="w-full rounded-2xl border py-4 pl-12 pr-12 text-base
+                                        text-neutral-900 outline-none transition
+                                        placeholder:text-neutral-400
+                                        focus:border-red-300 focus:bg-white focus:ring-4 focus:ring-red-100
+                                        @error('password') border-red-400 bg-red-50 @else border-neutral-200 bg-neutral-50 @enderror">
                                 {{-- Toggle show/hide --}}
                                 <button type="button"
                                     @click="showPassword = !showPassword"
