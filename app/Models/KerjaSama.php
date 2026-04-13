@@ -20,8 +20,8 @@ class KerjaSama extends Model
     protected function casts(): array
     {
         return [
-            'tanggal_mulai' => 'date',
-            'tanggal_berakhir' => 'date',
+            'tanggal_mulai' => 'datetime',
+            'tanggal_berakhir' => 'datetime',
             'harga_per_kilogram' => 'decimal:2',
         ];
     }

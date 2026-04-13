@@ -48,7 +48,7 @@ class Dashboard extends Component
     $today = Carbon::today();
 
     $this->totalFasilitas = FasilitasKesehatan::count();
-    $this->kerjaSamaAktif = KerjaSama::where('status', 'aktif')->count();
+    $this->kerjaSamaAktif = KerjaSama::where('status', 'active')->count();
     $this->dokumenExpiredCount = Dokumen::where('status', 'expired')
       ->orWhere(function ($q) use ($today) {
         $q->whereNotNull('tanggal_berlaku_sampai')
@@ -65,7 +65,7 @@ class Dashboard extends Component
     $batas30 = Carbon::today()->addDays(30);
 
     $this->notifKerjaSamaHabis = KerjaSama::with('fasilitasKesehatan')
-      ->where('status', 'aktif')
+      ->where('status', 'active')
       ->whereNotNull('tanggal_berakhir')
       ->whereBetween('tanggal_berakhir', [$today, $batas30])
       ->orderBy('tanggal_berakhir')
