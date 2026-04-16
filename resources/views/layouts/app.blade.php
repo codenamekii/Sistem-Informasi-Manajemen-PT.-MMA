@@ -19,27 +19,30 @@
 
   {{-- Sidebar --}}
   <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed top-0 left-0 z-30 h-screen w-64 bg-white border-r border-gray-200
-           transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col overflow-hidden">
+           transition-transform duration-300 ease-in-out lg:translate-x-0
+           flex flex-col overflow-hidden">
 
-    {{-- Brand --}}
-    <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-200 shrink-0 sm:px-4 sm:py-3.5">
-      <div class="flex items-center justify-center w-10 h-10 shrink-0">
-        <img src="{{ asset('storage/gambar/logomma.png') }}" alt="Logo MMA" class="w-full h-full object-contain">
-      </div>
+    {{-- ===================== HEADER SIDEBAR ===================== --}}
+    <div class="shrink-0 border-b border-gray-200 px-4 py-3 sm:px-4 sm:py-3.5">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="flex items-center justify-center w-10 h-10 shrink-0">
+          <img src="{{ asset('storage/gambar/logomma.png') }}" alt="Logo MMA" class="w-full h-full object-contain">
+        </div>
 
-      <div class="min-w-0 flex-1 leading-tight">
-        <p class="text-[12px] sm:text-[13px] font-bold text-gray-800 truncate">
-          PT. Mitra Mecca Abadi
-        </p>
-        <p class="mt-0.5 text-[10px] sm:text-[11px] text-gray-400 truncate">
-          Sistem Manajemen Internal
-        </p>
+        <div class="min-w-0 flex-1">
+          <p class="text-[12px] sm:text-[13px] font-bold text-gray-800 leading-tight truncate">
+            PT. Mitra Mecca Abadi
+          </p>
+          <p class="mt-0.5 text-[10px] sm:text-[11px] text-gray-400 leading-tight truncate">
+            Sistem Manajemen Internal
+          </p>
+        </div>
       </div>
     </div>
 
-    {{-- Menu utama --}}
+    {{-- ===================== MENU SIDEBAR ===================== --}}
     <div class="flex-1 min-h-0 overflow-y-auto">
-      <ul class="px-2.5 py-3 space-y-0.5 sm:px-3 sm:py-3.5">
+      <ul class="px-2.5 py-3 sm:px-3 sm:py-3.5 space-y-0.5 sm:space-y-1">
 
         @php $user = auth()->user(); @endphp
 
@@ -57,6 +60,7 @@
           </a>
         </li>
 
+        {{-- Fasilitas Kesehatan --}}
         @if ($user->canAccess('fasilitas'))
               <li>
                 <a href="{{ route('fasilitas-kesehatan.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -72,6 +76,7 @@
               </li>
         @endif
 
+        {{-- Kerja Sama --}}
         @if ($user->canAccess('kerja_sama'))
               <li>
                 <a href="{{ route('kerja-sama.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -87,6 +92,7 @@
               </li>
         @endif
 
+        {{-- Dokumen --}}
         @if ($user->canAccess('dokumen'))
               <li>
                 <a href="{{ route('dokumen.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -102,6 +108,7 @@
               </li>
         @endif
 
+        {{-- Jadwal Pengangkutan --}}
         @if ($user->canAccess('jadwal'))
               <li>
                 <a href="{{ route('jadwal-pengangkutan.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -117,6 +124,7 @@
               </li>
         @endif
 
+        {{-- Armada --}}
         @if ($user->canAccess('armada'))
               <li>
                 <a href="{{ route('armada.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -132,6 +140,7 @@
               </li>
         @endif
 
+        {{-- Petugas --}}
         @if ($user->canAccess('petugas'))
               <li>
                 <a href="{{ route('petugas.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -148,6 +157,7 @@
               </li>
         @endif
 
+        {{-- Realisasi --}}
         @if ($user->canAccess('realisasi'))
               <li>
                 <a href="{{ route('realisasi.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -163,6 +173,7 @@
               </li>
         @endif
 
+        {{-- Laporan --}}
         @if ($user->canAccess('laporan'))
               <li>
                 <a href="{{ route('laporan.index') }}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
@@ -181,8 +192,8 @@
       </ul>
     </div>
 
-    {{-- Footer sidebar tetap di bawah --}}
-    <div class="border-t border-gray-200 px-2.5 py-3 sm:px-3 sm:py-3.5 shrink-0 bg-white">
+    {{-- ===================== FOOTER SIDEBAR ===================== --}}
+    <div class="shrink-0 border-t border-gray-200 bg-white px-2.5 py-3 sm:px-3 sm:py-3.5">
       <div class="px-3 pb-2">
         <p class="text-xs font-medium text-gray-700 truncate">{{ auth()->user()->name }}</p>
         <p class="text-xs text-gray-400 truncate">{{ auth()->user()->labelRole() }}</p>
@@ -201,9 +212,8 @@
 
       <form method="POST" action="/logout">
         @csrf
-        <button type="submit" class="flex w-full items-center gap-3 px-3 py-2 text-sm font-medium
-                 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700
-                 transition-colors duration-200">
+        <button type="submit" class="flex w-full items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg
+                 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200">
           <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0
                  01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
