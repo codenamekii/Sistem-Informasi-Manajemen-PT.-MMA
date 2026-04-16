@@ -12,12 +12,10 @@ class Show extends Component
 {
   public JadwalPengangkutan $jadwalPengangkutan;
 
-  // Data yang diekspos ke view
   public array $detail = [];
 
   public function mount(JadwalPengangkutan $jadwalPengangkutan): void
   {
-    // Guard: hanya record completed yang boleh diakses sebagai realisasi
     if ($jadwalPengangkutan->status !== 'completed') {
       abort(404);
     }
@@ -26,7 +24,6 @@ class Show extends Component
 
     $this->jadwalPengangkutan = $jadwalPengangkutan;
 
-    // Petugas dari relasi atau fallback legacy
     $petugasList = $jadwalPengangkutan->petugas->isNotEmpty()
       ? $jadwalPengangkutan->petugas->map(fn($p) => [
         'nama' => $p->nama_petugas,
@@ -36,7 +33,6 @@ class Show extends Component
 
     $petugasFallback = $jadwalPengangkutan->petugas_pic ?: '—';
 
-    // URL file bukti — null jika belum ada
     $manifestUrl = $jadwalPengangkutan->manifest_elektronik_path
       ? Storage::url($jadwalPengangkutan->manifest_elektronik_path)
       : null;
@@ -48,8 +44,12 @@ class Show extends Component
     $this->detail = [
       'id' => $jadwalPengangkutan->id,
       'kode_jadwal' => $jadwalPengangkutan->kode_jadwal,
-      'tanggal_pengangkutan' => Carbon::parse($jadwalPengangkutan->tanggal_pengangkutan)->format('d/m/Y') ?: '—',
-      'tanggal_realisasi' => Carbon::parse($jadwalPengangkutan->tanggal_realisasi)->format('d/m/Y') ?: '—',
+      'tanggal_pengangkutan' => $jadwalPengangkutan->tanggal_pengangkutan
+        ? Carbon::parse($jadwalPengangkutan->tanggal_pengangkutan)->format('d/m/Y')
+        : '—',
+      'tanggal_realisasi' => $jadwalPengangkutan->tanggal_realisasi
+        ? Carbon::parse($jadwalPengangkutan->tanggal_realisasi)->format('d/m/Y')
+        : '—',
       'nama_fasilitas_display' => $jadwalPengangkutan->nama_fasilitas_display,
       'armada_display' => $jadwalPengangkutan->armada_display,
       'petugas_list' => $petugasList,
@@ -58,9 +58,13 @@ class Show extends Component
       'has_bukti_lengkap' => $jadwalPengangkutan->has_bukti_lengkap,
       'manifest_url' => $manifestUrl,
       'bukti_foto_url' => $buktiFotoUrl,
-
-      // Info kerja sama (jika tersambung)
       'nomor_perjanjian' => $jadwalPengangkutan->kerjaSama?->nomor_perjanjian ?: '—',
+      'total_limbah_kg' => $jadwalPengangkutan->total_limbah_kg,
+      'total_limbah_kg_display' => $jadwalPengangkutan->total_limbah_kg_display,
+      'harga_per_kg_realisasi' => $jadwalPengangkutan->harga_per_kg_realisasi,
+      'harga_per_kg_realisasi_rupiah' => $jadwalPengangkutan->harga_per_kg_realisasi_rupiah,
+      'total_biaya_realisasi' => $jadwalPengangkutan->total_biaya_realisasi,
+      'total_biaya_realisasi_rupiah' => $jadwalPengangkutan->total_biaya_realisasi_rupiah,
     ];
   }
 

@@ -19,7 +19,6 @@
   <form wire:submit="save" enctype="multipart/form-data">
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
 
-      {{-- Kode Jadwal — read-only saat edit --}}
       <div>
         <label for="kode_jadwal" class="block mb-2 text-sm font-medium text-gray-900">
           Kode Jadwal
@@ -29,7 +28,6 @@
         <p class="mt-1 text-xs text-gray-400">Kode jadwal tidak dapat diubah.</p>
       </div>
 
-      {{-- Tanggal Pengangkutan --}}
       <div>
         <label for="tanggal_pengangkutan" class="block mb-2 text-sm font-medium text-gray-900">
           Tanggal Pengangkutan <span class="text-red-500">*</span>
@@ -42,7 +40,6 @@
         @enderror
       </div>
 
-      {{-- Kerja Sama --}}
       <div>
         <label for="kerja_sama_id" class="block mb-2 text-sm font-medium text-gray-900">
           Kerja Sama <span class="text-red-500">*</span>
@@ -62,7 +59,6 @@
         @enderror
       </div>
 
-      {{-- Armada --}}
       <div>
         <label for="armada_id" class="block mb-2 text-sm font-medium text-gray-900">
           Armada <span class="text-red-500">*</span>
@@ -85,7 +81,6 @@
         @enderror
       </div>
 
-      {{-- Petugas --}}
       <div>
         <label class="block mb-2 text-sm font-medium text-gray-900">
           Petugas <span class="text-red-500">*</span>
@@ -110,7 +105,6 @@
         </div>
       </div>
 
-      {{-- Status --}}
       <div>
         <label for="status" class="block mb-2 text-sm font-medium text-gray-900">
           Status <span class="text-red-500">*</span>
@@ -129,27 +123,40 @@
         @enderror
       </div>
 
-      {{-- Section Realisasi — hanya muncul saat status = completed --}}
       @if ($status === 'completed')
         <div class="border border-green-200 bg-green-50 rounded-xl p-5 space-y-5">
           <h4 class="text-sm font-semibold text-green-800">
             Bukti Penyelesaian Pengangkutan
           </h4>
 
-          {{-- Tanggal Realisasi --}}
           <div>
             <label for="tanggal_realisasi" class="block mb-2 text-sm font-medium text-gray-900">
               Tanggal Realisasi <span class="text-red-500">*</span>
             </label>
             <input type="date" id="tanggal_realisasi" wire:model="tanggal_realisasi" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg
-                                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                       @error('tanggal_realisasi') border-red-500 @enderror" />
+                                           focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                           @error('tanggal_realisasi') border-red-500 @enderror" />
             @error('tanggal_realisasi')
               <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
           </div>
 
-          {{-- Manifest Elektronik --}}
+          <div>
+            <label for="total_limbah_kg" class="block mb-2 text-sm font-medium text-gray-900">
+              Total Limbah Diangkut (Kg) <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="total_limbah_kg" wire:model="total_limbah_kg" step="0.01" min="0.01"
+              placeholder="Contoh: 125.50" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg
+                                           focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                                           @error('total_limbah_kg') border-red-500 @enderror" />
+            <p class="mt-1 text-xs text-gray-500">
+              Masukkan total limbah medis yang benar-benar diangkut pada realisasi ini.
+            </p>
+            @error('total_limbah_kg')
+              <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
           <div>
             <label for="manifest_elektronik" class="block mb-2 text-sm font-medium text-gray-900">
               Manifest Elektronik
@@ -160,13 +167,13 @@
             </label>
             @if ($jadwal->manifest_elektronik_path)
               <p class="mb-2 text-xs text-green-700 bg-green-50 border border-green-200
-                                               rounded px-3 py-1.5 inline-block">
+                                                       rounded px-3 py-1.5 inline-block">
                 ✓ File sudah ada — unggah baru untuk mengganti
               </p>
             @endif
             <input type="file" id="manifest_elektronik" wire:model="manifest_elektronik" accept=".pdf" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg
-                                       cursor-pointer bg-white focus:outline-none p-2
-                                       @error('manifest_elektronik') border-red-500 @enderror" />
+                                           cursor-pointer bg-white focus:outline-none p-2
+                                           @error('manifest_elektronik') border-red-500 @enderror" />
             <div wire:loading wire:target="manifest_elektronik" class="mt-1 text-xs text-blue-600">
               Mengunggah...
             </div>
@@ -175,7 +182,6 @@
             @enderror
           </div>
 
-          {{-- Bukti Foto --}}
           <div>
             <label for="bukti_foto_pengangkutan" class="block mb-2 text-sm font-medium text-gray-900">
               Bukti Foto Pengangkutan
@@ -186,14 +192,14 @@
             </label>
             @if ($jadwal->bukti_foto_pengangkutan_path)
               <p class="mb-2 text-xs text-green-700 bg-green-50 border border-green-200
-                                               rounded px-3 py-1.5 inline-block">
+                                                       rounded px-3 py-1.5 inline-block">
                 ✓ File sudah ada — unggah baru untuk mengganti
               </p>
             @endif
             <input type="file" id="bukti_foto_pengangkutan" wire:model="bukti_foto_pengangkutan" accept=".jpg,.jpeg,.png"
               class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg
-                                       cursor-pointer bg-white focus:outline-none p-2
-                                       @error('bukti_foto_pengangkutan') border-red-500 @enderror" />
+                                           cursor-pointer bg-white focus:outline-none p-2
+                                           @error('bukti_foto_pengangkutan') border-red-500 @enderror" />
             <div wire:loading wire:target="bukti_foto_pengangkutan" class="mt-1 text-xs text-blue-600">
               Mengunggah...
             </div>
@@ -206,7 +212,6 @@
 
     </div>
 
-    {{-- Tombol Aksi --}}
     <div class="flex items-center justify-end gap-3 mt-6">
       <a href="{{ route('jadwal-pengangkutan.show', $jadwal->id) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300
                        rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200

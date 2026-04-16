@@ -73,20 +73,17 @@
     {{-- Toolbar --}}
     <div class="flex flex-col gap-3 px-5 py-4 border-b border-gray-100">
 
-      {{-- Baris 1: judul + search --}}
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h3 class="text-sm font-semibold text-gray-700">Daftar Jadwal</h3>
         <div class="w-full sm:w-72">
-          <input type="text" wire:model.live.debounce.300ms="search"
-            placeholder="Cari kode, fasilitas, armada, atau petugas..." class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm
+          <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari kode, fasilitas, atau status..."
+            class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm
                                rounded-lg focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
         </div>
       </div>
 
-      {{-- Baris 2: filter --}}
       <div class="flex flex-wrap items-center gap-2">
 
-        {{-- Filter Status --}}
         <select wire:model.live="filterStatus" class="bg-gray-50 border border-gray-300 text-gray-700 text-xs rounded-lg
                            focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
           <option value="">Semua Status</option>
@@ -97,7 +94,6 @@
           <option value="cancelled">Dibatalkan</option>
         </select>
 
-        {{-- Filter Koneksi --}}
         <select wire:model.live="filterKoneksi" class="bg-gray-50 border border-gray-300 text-gray-700 text-xs rounded-lg
                            focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
           <option value="">Semua Koneksi</option>
@@ -105,7 +101,6 @@
           <option value="legacy">Masih data lama</option>
         </select>
 
-        {{-- Filter Bukti --}}
         <select wire:model.live="filterBukti" class="bg-gray-50 border border-gray-300 text-gray-700 text-xs rounded-lg
                            focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
           <option value="">Semua Bukti</option>
@@ -114,7 +109,6 @@
           <option value="bukan_completed">Belum Selesai</option>
         </select>
 
-        {{-- Reset --}}
         @if ($search !== '' || $filterStatus !== '' || $filterKoneksi !== '' || $filterBukti !== '')
           <button wire:click="resetFilters"
             class="text-xs text-gray-500 hover:text-red-600 underline underline-offset-2 transition-colors duration-150">
@@ -133,8 +127,6 @@
             <th class="px-5 py-3 font-medium">Kode Jadwal</th>
             <th class="px-5 py-3 font-medium">Tgl. Pengangkutan</th>
             <th class="px-5 py-3 font-medium">Fasilitas</th>
-            <th class="px-5 py-3 font-medium">Armada</th>
-            <th class="px-5 py-3 font-medium">Petugas</th>
             <th class="px-5 py-3 font-medium">Status</th>
             <th class="px-5 py-3 font-medium text-right">Aksi</th>
           </tr>
@@ -162,7 +154,6 @@
             @endphp
             <tr class="hover:bg-gray-50 transition-colors duration-150">
 
-              {{-- Kode + indikator koneksi --}}
               <td class="px-5 py-3 whitespace-nowrap">
                 <div class="font-mono text-xs font-medium text-gray-700">
                   {{ $item['kode_jadwal'] }}
@@ -178,28 +169,15 @@
                 {{ $item['tanggal_pengangkutan'] }}
               </td>
 
-              <td class="px-5 py-3 max-w-[160px]">
+              <td class="px-5 py-3 max-w-[220px]">
                 <span class="block truncate text-sm text-gray-800" title="{{ $item['nama_fasilitas_display'] }}">
                   {{ $item['nama_fasilitas_display'] }}
                 </span>
               </td>
 
               <td class="px-5 py-3 whitespace-nowrap">
-                <span class="font-mono text-xs text-gray-600">
-                  {{ $item['armada_display'] }}
-                </span>
-              </td>
-
-              <td class="px-5 py-3 max-w-[160px]">
-                <span class="block truncate text-sm text-gray-700" title="{{ $item['petugas_display'] }}">
-                  {{ $item['petugas_display'] }}
-                </span>
-              </td>
-
-              {{-- Status + indikator bukti --}}
-              <td class="px-5 py-3 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full
-                                           text-xs font-medium {{ $badge }}">
+                                               text-xs font-medium {{ $badge }}">
                   {{ $label }}
                 </span>
                 @if ($item['status'] === 'completed')
@@ -241,7 +219,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="7" class="px-5 py-12 text-center">
+              <td colspan="5" class="px-5 py-12 text-center">
                 @if ($search !== '' || $filterStatus !== '' || $filterKoneksi !== '' || $filterBukti !== '')
                   <p class="text-sm text-gray-500 mb-2">
                     Tidak ada jadwal yang cocok dengan filter aktif.

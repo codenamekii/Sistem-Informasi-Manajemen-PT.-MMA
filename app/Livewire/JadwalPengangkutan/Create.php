@@ -2,6 +2,7 @@
 
 namespace App\Livewire\JadwalPengangkutan;
 
+use App\Livewire\Concerns\HasRoleGuard;
 use App\Models\Armada;
 use App\Models\JadwalPengangkutan;
 use App\Models\KerjaSama;
@@ -10,7 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Livewire\Concerns\HasRoleGuard;
 
 class Create extends Component
 {
@@ -26,12 +26,23 @@ class Create extends Component
 
   // Field realisasi
   public string $tanggal_realisasi = '';
+  public ?string $total_limbah_kg = null;
   public $manifest_elektronik = null;
   public $bukti_foto_pengangkutan = null;
 
   public function mount(): void
   {
     $this->kode_jadwal = $this->generateKodeJadwal();
+  }
+
+  public function updatedStatus(string $value): void
+  {
+    if ($value !== 'completed') {
+      $this->tanggal_realisasi = '';
+      $this->total_limbah_kg = null;
+      $this->manifest_elektronik = null;
+      $this->bukti_foto_pengangkutan = null;
+    }
   }
 
   protected function generateKodeJadwal(): string
@@ -82,10 +93,12 @@ class Create extends Component
 
     if ($this->status === 'completed') {
       $rules['tanggal_realisasi'] = 'required|date';
+      $rules['total_limbah_kg'] = 'required|numeric|min:0.01';
       $rules['manifest_elektronik'] = 'required|file|mimes:pdf|max:10240';
       $rules['bukti_foto_pengangkutan'] = 'required|file|mimes:jpg,jpeg,png|max:10240';
     } else {
       $rules['tanggal_realisasi'] = 'nullable|date';
+      $rules['total_limbah_kg'] = 'nullable|numeric|min:0.01';
       $rules['manifest_elektronik'] = 'nullable|file|mimes:pdf|max:10240';
       $rules['bukti_foto_pengangkutan'] = 'nullable|file|mimes:jpg,jpeg,png|max:10240';
     }
@@ -101,6 +114,9 @@ class Create extends Component
       'status.required' => 'Status wajib dipilih.',
       'status.in' => 'Status tidak valid.',
       'tanggal_realisasi.required' => 'Tanggal realisasi wajib diisi saat status Selesai.',
+      'total_limbah_kg.required' => 'Total limbah wajib diisi saat status Selesai.',
+      'total_limbah_kg.numeric' => 'Total limbah harus berupa angka.',
+      'total_limbah_kg.min' => 'Total limbah harus lebih besar dari 0.',
       'manifest_elektronik.required' => 'Manifest elektronik wajib diunggah saat status Selesai.',
       'manifest_elektronik.mimes' => 'Manifest harus berformat PDF.',
       'manifest_elektronik.max' => 'Ukuran manifest maksimal 10 MB.',
@@ -112,7 +128,6 @@ class Create extends Component
     $this->validate($rules, $messages);
 
     DB::transaction(function () {
-
       $kerjaSama = KerjaSama::with('fasilitasKesehatan')->find($this->kerja_sama_id);
       $armada = Armada::find($this->armada_id);
 
@@ -123,6 +138,9 @@ class Create extends Component
 
       $manifestPath = null;
       $buktiFotoPath = null;
+      $hargaPerKgRealisasi = null;
+      $totalBiayaRealisasi = null;
+      $totalLimbahKg = null;
 
       if ($this->status === 'completed') {
         if ($this->manifest_elektronik) {
@@ -132,6 +150,18 @@ class Create extends Component
         if ($this->bukti_foto_pengangkutan) {
           $buktiFotoPath = $this->bukti_foto_pengangkutan->store('jadwal/bukti', 'public');
         }
+
+        $hargaPerKgRealisasi = $kerjaSama?->harga_per_kilogram !== null
+          ? (float) $kerjaSama->harga_per_kilogram
+          : null;
+
+        $totalLimbahKg = $this->total_limbah_kg !== null && $this->total_limbah_kg !== ''
+          ? (float) $this->total_limbah_kg
+          : null;
+
+        $totalBiayaRealisasi = ($hargaPerKgRealisasi !== null && $totalLimbahKg !== null)
+          ? $hargaPerKgRealisasi * $totalLimbahKg
+          : null;
       }
 
       $jadwal = JadwalPengangkutan::create([
@@ -141,6 +171,9 @@ class Create extends Component
         'armada_id' => $this->armada_id,
         'status' => $this->status,
         'tanggal_realisasi' => $this->status === 'completed' ? $this->tanggal_realisasi : null,
+        'total_limbah_kg' => $this->status === 'completed' ? $totalLimbahKg : null,
+        'harga_per_kg_realisasi' => $this->status === 'completed' ? $hargaPerKgRealisasi : null,
+        'total_biaya_realisasi' => $this->status === 'completed' ? $totalBiayaRealisasi : null,
         'manifest_elektronik_path' => $manifestPath,
         'bukti_foto_pengangkutan_path' => $buktiFotoPath,
 

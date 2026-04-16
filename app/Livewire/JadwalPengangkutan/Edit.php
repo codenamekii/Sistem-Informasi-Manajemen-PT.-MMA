@@ -2,18 +2,21 @@
 
 namespace App\Livewire\JadwalPengangkutan;
 
+use App\Livewire\Concerns\HasRoleGuard;
 use App\Models\Armada;
 use App\Models\JadwalPengangkutan;
 use App\Models\KerjaSama;
 use App\Models\Petugas;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class Edit extends Component
 {
   use WithFileUploads;
+  use HasRoleGuard;
 
   public JadwalPengangkutan $jadwal;
 
@@ -26,6 +29,7 @@ class Edit extends Component
 
   // Field realisasi
   public string $tanggal_realisasi = '';
+  public ?string $total_limbah_kg = null;
   public $manifest_elektronik = null;
   public $bukti_foto_pengangkutan = null;
 
@@ -33,16 +37,33 @@ class Edit extends Component
   {
     $this->jadwal = $jadwalPengangkutan->load('petugas');
 
-    // Pre-populate dari data existing
     $this->kode_jadwal = $jadwalPengangkutan->kode_jadwal;
-    $this->tanggal_pengangkutan = Carbon::parse($jadwalPengangkutan->tanggal_pengangkutan)->format('Y-m-d') ?? '';
+    $this->tanggal_pengangkutan = $jadwalPengangkutan->tanggal_pengangkutan
+      ? Carbon::parse($jadwalPengangkutan->tanggal_pengangkutan)->format('Y-m-d')
+      : '';
+
     $this->kerja_sama_id = $jadwalPengangkutan->kerja_sama_id;
     $this->armada_id = $jadwalPengangkutan->armada_id;
     $this->status = $jadwalPengangkutan->status;
-    $this->tanggal_realisasi = Carbon::parse($jadwalPengangkutan->tanggal_realisasi)->format('Y-m-d') ?? '';
+    $this->tanggal_realisasi = $jadwalPengangkutan->tanggal_realisasi
+      ? Carbon::parse($jadwalPengangkutan->tanggal_realisasi)->format('Y-m-d')
+      : '';
 
-    // Pre-populate petugas dari pivot
+    $this->total_limbah_kg = $jadwalPengangkutan->total_limbah_kg !== null
+      ? (string) $jadwalPengangkutan->total_limbah_kg
+      : null;
+
     $this->petugas_ids = $jadwalPengangkutan->petugas->pluck('id')->toArray();
+  }
+
+  public function updatedStatus(string $value): void
+  {
+    if ($value !== 'completed') {
+      $this->tanggal_realisasi = '';
+      $this->total_limbah_kg = null;
+      $this->manifest_elektronik = null;
+      $this->bukti_foto_pengangkutan = null;
+    }
   }
 
   public function getKerjaSamaOptionsProperty()
@@ -67,7 +88,7 @@ class Edit extends Component
     if (!$this->guardAction('jadwal')) {
       return;
     }
-    // Validasi inti
+
     $rules = [
       'kode_jadwal' => 'required|string|max:50|unique:jadwal_pengangkutans,kode_jadwal,' . $this->jadwal->id,
       'tanggal_pengangkutan' => 'required|date',
@@ -78,11 +99,10 @@ class Edit extends Component
       'status' => 'required|in:draft,scheduled,in_progress,completed,cancelled',
     ];
 
-    // Validasi kondisional saat completed
     if ($this->status === 'completed') {
       $rules['tanggal_realisasi'] = 'required|date';
+      $rules['total_limbah_kg'] = 'required|numeric|min:0.01';
 
-      // File baru hanya wajib jika belum ada file lama
       $rules['manifest_elektronik'] = $this->jadwal->manifest_elektronik_path
         ? 'nullable|file|mimes:pdf|max:10240'
         : 'required|file|mimes:pdf|max:10240';
@@ -92,6 +112,7 @@ class Edit extends Component
         : 'required|file|mimes:jpg,jpeg,png|max:10240';
     } else {
       $rules['tanggal_realisasi'] = 'nullable|date';
+      $rules['total_limbah_kg'] = 'nullable|numeric|min:0.01';
       $rules['manifest_elektronik'] = 'nullable';
       $rules['bukti_foto_pengangkutan'] = 'nullable';
     }
@@ -107,6 +128,9 @@ class Edit extends Component
       'status.required' => 'Status wajib dipilih.',
       'status.in' => 'Status tidak valid.',
       'tanggal_realisasi.required' => 'Tanggal realisasi wajib diisi saat status Selesai.',
+      'total_limbah_kg.required' => 'Total limbah wajib diisi saat status Selesai.',
+      'total_limbah_kg.numeric' => 'Total limbah harus berupa angka.',
+      'total_limbah_kg.min' => 'Total limbah harus lebih besar dari 0.',
       'manifest_elektronik.required' => 'Manifest elektronik wajib diunggah saat status Selesai.',
       'manifest_elektronik.mimes' => 'Manifest harus berformat PDF.',
       'manifest_elektronik.max' => 'Ukuran manifest maksimal 10 MB.',
@@ -117,24 +141,56 @@ class Edit extends Component
 
     $this->validate($rules, $messages);
 
-    // Load relasi untuk fallback legacy
     $kerjaSama = KerjaSama::with('fasilitasKesehatan')->find($this->kerja_sama_id);
     $armada = Armada::find($this->armada_id);
     $namaPetugas = Petugas::whereIn('id', $this->petugas_ids)
       ->orderBy('nama_petugas')
       ->pluck('nama_petugas');
 
-    // Simpan file bukti — jika ada file baru, ganti; jika tidak, pertahankan yang lama
     $manifestPath = $this->jadwal->manifest_elektronik_path;
     $buktiFotoPath = $this->jadwal->bukti_foto_pengangkutan_path;
+    $hargaPerKgRealisasi = $this->jadwal->harga_per_kg_realisasi;
+    $totalLimbahKg = $this->jadwal->total_limbah_kg;
+    $totalBiayaRealisasi = $this->jadwal->total_biaya_realisasi;
+    $tanggalRealisasi = $this->jadwal->tanggal_realisasi;
 
     if ($this->status === 'completed') {
       if ($this->manifest_elektronik) {
         $manifestPath = $this->manifest_elektronik->store('jadwal/manifest', 'public');
       }
+
       if ($this->bukti_foto_pengangkutan) {
         $buktiFotoPath = $this->bukti_foto_pengangkutan->store('jadwal/bukti', 'public');
       }
+
+      $hargaPerKgRealisasi = $kerjaSama?->harga_per_kilogram !== null
+        ? (float) $kerjaSama->harga_per_kilogram
+        : null;
+
+      $totalLimbahKg = $this->total_limbah_kg !== null && $this->total_limbah_kg !== ''
+        ? (float) $this->total_limbah_kg
+        : null;
+
+      $totalBiayaRealisasi = ($hargaPerKgRealisasi !== null && $totalLimbahKg !== null)
+        ? $hargaPerKgRealisasi * $totalLimbahKg
+        : null;
+
+      $tanggalRealisasi = $this->tanggal_realisasi;
+    } else {
+      if ($this->jadwal->manifest_elektronik_path) {
+        Storage::disk('public')->delete($this->jadwal->manifest_elektronik_path);
+      }
+
+      if ($this->jadwal->bukti_foto_pengangkutan_path) {
+        Storage::disk('public')->delete($this->jadwal->bukti_foto_pengangkutan_path);
+      }
+
+      $manifestPath = null;
+      $buktiFotoPath = null;
+      $hargaPerKgRealisasi = null;
+      $totalLimbahKg = null;
+      $totalBiayaRealisasi = null;
+      $tanggalRealisasi = null;
     }
 
     $this->jadwal->update([
@@ -143,11 +199,13 @@ class Edit extends Component
       'kerja_sama_id' => $this->kerja_sama_id,
       'armada_id' => $this->armada_id,
       'status' => $this->status,
-      'tanggal_realisasi' => $this->status === 'completed' ? $this->tanggal_realisasi : $this->jadwal->tanggal_realisasi,
+      'tanggal_realisasi' => $tanggalRealisasi,
+      'total_limbah_kg' => $totalLimbahKg,
+      'harga_per_kg_realisasi' => $hargaPerKgRealisasi,
+      'total_biaya_realisasi' => $totalBiayaRealisasi,
       'manifest_elektronik_path' => $manifestPath,
       'bukti_foto_pengangkutan_path' => $buktiFotoPath,
 
-      // Fallback legacy
       'nama_fasilitas' => $kerjaSama?->nama_fasilitas_display ?: $this->jadwal->nama_fasilitas,
       'armada' => $armada
         ? $armada->nomor_polisi . ' (' . $armada->jenis_kendaraan . ')'

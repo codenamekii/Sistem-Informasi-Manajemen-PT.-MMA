@@ -56,12 +56,13 @@
         @if ($user->canAccess('fasilitas'))
               <li>
                 <a href="{{ route('fasilitas-kesehatan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('fasilitas-kesehatan.*')
+                                                       {{ request()->routeIs('fasilitas-kesehatan.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2
-                                               0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2
+                                                           0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   Fasilitas Kesehatan
                 </a>
@@ -72,12 +73,12 @@
         @if ($user->canAccess('kerja_sama'))
               <li>
                 <a href="{{ route('kerja-sama.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('kerja-sama.*')
+                                                       {{ request()->routeIs('kerja-sama.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0
-                                               01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                           01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Kerja Sama
                 </a>
@@ -88,12 +89,12 @@
         @if ($user->canAccess('dokumen'))
               <li>
                 <a href="{{ route('dokumen.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('dokumen.*')
+                                                       {{ request()->routeIs('dokumen.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0
-                                               0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                           0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                   Dokumen
                 </a>
@@ -104,12 +105,12 @@
         @if ($user->canAccess('jadwal'))
               <li>
                 <a href="{{ route('jadwal-pengangkutan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('jadwal-pengangkutan.*')
+                                                       {{ request()->routeIs('jadwal-pengangkutan.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0
-                                               00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                           00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   Jadwal Pengangkutan
                 </a>
@@ -120,7 +121,7 @@
         @if ($user->canAccess('armada'))
               <li>
                 <a href="{{ route('armada.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('armada.*')
+                                                       {{ request()->routeIs('armada.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,13 +137,13 @@
         @if ($user->canAccess('petugas'))
               <li>
                 <a href="{{ route('petugas.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('petugas.*')
+                                                       {{ request()->routeIs('petugas.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7
-                                               20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002
-                                               0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                           20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002
+                                                           0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Petugas
                 </a>
@@ -153,7 +154,7 @@
         @if ($user->canAccess('realisasi'))
               <li>
                 <a href="{{ route('realisasi.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('realisasi.*')
+                                                       {{ request()->routeIs('realisasi.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,12 +170,12 @@
         @if ($user->canAccess('laporan'))
               <li>
                 <a href="{{ route('laporan.index') }}" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg
-                                           {{ request()->routeIs('laporan.*')
+                                                       {{ request()->routeIs('laporan.*')
           ? 'bg-blue-50 text-blue-700'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                   <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0
-                                               01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                           01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Laporan
                 </a>
@@ -183,7 +184,7 @@
 
       </ul>
 
-      {{-- Footer sidebar: label role + logout --}}
+      {{-- Footer sidebar: label role + akun + logout --}}
       <div class="px-3 py-4 border-t border-gray-200 space-y-1">
 
         {{-- Label role --}}
@@ -192,14 +193,27 @@
           <p class="text-xs text-gray-400 truncate">{{ auth()->user()->labelRole() }}</p>
         </div>
 
+        {{-- Ubah Password --}}
+        <a href="{{ route('akun.ubah-password') }}" class="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium
+                             rounded-lg
+                             {{ request()->routeIs('akun.ubah-password')
+  ? 'bg-blue-50 text-blue-700'
+  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 11c0 .552-.224 1.052-.586 1.414A1.994 1.994 0 0110 13a2 2 0 110-4 2 2 0 012 2zm0 0V9a4 4 0 118 0v2m-8 0h8m-8 0H6a2 2 0 00-2 2v5a2 2 0 002 2h12a2 2 0 002-2v-5a2 2 0 00-2-2" />
+          </svg>
+          Ubah Password
+        </a>
+
         <form method="POST" action="/logout">
           @csrf
           <button type="submit" class="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium
                                rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700
                                transition-colors duration-200">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0
-                                   01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Logout
           </button>

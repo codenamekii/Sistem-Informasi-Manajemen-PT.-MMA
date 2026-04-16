@@ -29,6 +29,8 @@ use App\Livewire\JadwalPengangkutan\Edit as JadwalEdit;
 use App\Livewire\Realisasi\Index as RealisasiIndex;
 use App\Livewire\Realisasi\Show as RealisasiShow;
 use App\Livewire\Laporan\Index as LaporanIndex;
+use App\Livewire\Realisasi\FasilitasShow as RealisasiFasilitasShow;
+use App\Livewire\Akun\UbahPassword as UbahPasswordPage;
 
 Route::get('/', function () {
   return view('landing');
@@ -38,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
 
   // ─── Dashboard — semua role ───────────────────────────
   Route::get('/dashboard', Dashboard::class)->name('dashboard');
+
+  // ─── Akun / Ubah Password — semua role ────────────────
+  Route::get('/ubah-password', UbahPasswordPage::class)
+    ->name('akun.ubah-password');
 
   // ─── Fasilitas Kesehatan ──────────────────────────────
   Route::middleware('role.access:fasilitas')->group(function () {
@@ -115,6 +121,10 @@ Route::middleware(['auth'])->group(function () {
   Route::middleware('role.access:realisasi')->group(function () {
     Route::get('/realisasi', RealisasiIndex::class)
       ->name('realisasi.index');
+
+    Route::get('/realisasi/fasilitas/{kerjaSama}', RealisasiFasilitasShow::class)
+      ->name('realisasi.fasilitas.show');
+
     Route::get('/realisasi/{jadwalPengangkutan}', RealisasiShow::class)
       ->name('realisasi.show');
   });
