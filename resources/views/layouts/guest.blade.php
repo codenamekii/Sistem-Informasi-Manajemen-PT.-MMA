@@ -7,14 +7,13 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{{ config('app.name', 'PT. Mitra Mecca Abadi') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
-  @livewireStyles
 </head>
 
 <body class="bg-gray-50 antialiased">
 
   @yield('content')
 
-  @livewireScripts
+
 </body>
 
 </html>

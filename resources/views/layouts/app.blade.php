@@ -7,7 +7,6 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('pageTitle', $pageTitle ?? 'Dashboard') — PT. MMA</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
-  @livewireStyles
 </head>
 
 <body class="bg-gray-50 antialiased" x-data="{ sidebarOpen: false }">
@@ -276,7 +275,6 @@
 
   </div>
 
-  @livewireScripts
 
 </body>
 

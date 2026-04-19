@@ -121,10 +121,8 @@ Route::middleware(['auth'])->group(function () {
   Route::middleware('role.access:realisasi')->group(function () {
     Route::get('/realisasi', RealisasiIndex::class)
       ->name('realisasi.index');
-
     Route::get('/realisasi/fasilitas/{kerjaSama}', RealisasiFasilitasShow::class)
       ->name('realisasi.fasilitas.show');
-
     Route::get('/realisasi/{jadwalPengangkutan}', RealisasiShow::class)
       ->name('realisasi.show');
   });
